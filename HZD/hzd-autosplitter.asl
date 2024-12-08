@@ -187,7 +187,7 @@ startup
 	};
 
     AddSplitSettingF("res_main_menu", "Reset on Main Menu", "Reset run when quitting to main menu", null);
-    
+
     settings.Add("ngp_overall",true, "NG+ Run");
     AddSplitSetting("01_ngp_start", "NG+ Start", "Note:\nDue to the information available, we cannot differentiate between resuming the cutscene and actually skipping it without starting the timer too late.\nOnce you are given the prompt to skip the cutscene, both Back and Skip will start the timer.\nPause via the Pause button or tabbing should be covered.", "ngp_overall");
     AddSplitSettingF("02_sawtooth_cs", "Sawtooth Looting", "On looting the Sawtooth", "ngp_overall");
@@ -232,7 +232,8 @@ startup
     AddSplitSetting("tfw01_songs_edge", "Song's Edge", "FT to Song's Edge or passing by the CF", "ngp_tfw");
     AddSplitSetting("tfw02_tallneck", "TFW Tallneck", "Any loads after the TN cutscene, designed to be the RFS after the Tallneck", "ngp_tfw");
     AddSplitSetting("tfw03_naltuk", "Naltuk", "End of Yapping to Naltuk the first time (i.e. kill the machines and tower first)", "ngp_tfw");
-    AddSplitSetting("tfw04_ourea", "Shaman's Path / Ourea", "Opening the facility door after talking to Ourea.", "ngp_tfw");
+    AddSplitSetting("tfw04a_shamans_path", "Shaman's Path Facility Entrance", "Opening the first facility door.", "ngp_tfw");
+    AddSplitSetting("tfw04b_ourea", "Shaman's Path / Ourea", "Opening the facility door after talking to Ourea.", "ngp_tfw");
     AddSplitSetting("tfw05_tfw_hg", "TFW Hunting Ground", "FT away from the HG", "ngp_tfw");
     AddSplitSetting("tfw06_werak_challenge", "Werak Challenge", "FT after fighting the bears", "ngp_tfw");
     AddSplitSetting("tfw07_longnotch", "Longnotch", "Skipping the cutscene entering the facility", "ngp_tfw");
@@ -496,7 +497,7 @@ update
     // TFW area
     if(!vars.completedFacts.Contains("fact_tfw_area"))
     {
-        if(vars.BoundsCheckCyl(vars.positionVec, new double[]{2951.37, 1048.84}, 3.0, new double[]{287, 289})) // TODO: check alternative TFW 
+        if(vars.BoundsCheckCyl(vars.positionVec, new double[]{2951.37, 1048.84}, 3.0, new double[]{287, 289})) // TODO: check alternative TFW
         { vars.completedFacts.Add("fact_tfw_area"); }
     }
     else // fact_tfw_area
@@ -507,6 +508,14 @@ update
         {
             if(vars.BoundsCheckCyl(vars.positionVec, new double[]{2588.1, 1700.5}, 3.0, new double[]{455, 465}))
             { vars.completedFacts.Add("fact_tfw_tn"); }
+        }
+    }
+    if(!vars.completedFacts.Contains("fact_tfw_shamans_path"))
+    {
+        if(current.invulnerable > 0) // Alternative End of Shaman's Path
+        {
+            if(vars.BoundsCheckCircLat(vars.positionVec, new double[]{2241.29, 2699.6}, 3.0))
+            { vars.completedFacts.Add("fact_tfw_shamans_path"); }
         }
     }
     if(!vars.completedFacts.Contains("fact_tfw_ourea"))
@@ -670,7 +679,7 @@ split
     {
         if(current.loading > 0)
         {
-            if(!vars.BoundsCheckCircLat(vars.positionVec, new double[]{2385.8, -1896.5}, 100.0)) // Z 175.12 
+            if(!vars.BoundsCheckCircLat(vars.positionVec, new double[]{2385.8, -1896.5}, 100.0)) // Z 175.12
             { vars.completedSplits.Add("05_corrupter"); return true; }
         }
     }
@@ -733,7 +742,7 @@ split
             if(vars.BoundsCheckCyl(vars.positionVec, new double[]{-558.0, 1368.1}, 23.5, new double[]{121, 131}) || // cutscene part
                 vars.BoundsCheckCyl(vars.positionVec, new double[]{-599.4, 1371.9}, 1.5, new double[]{200, 203}) || // beginning -599.402,1371.879,201.054
                 vars.BoundsCheckCyl(vars.positionVec, new double[]{-609, 1378}, 1.0, new double[]{202, 205}) // end -608.975,1378.002,203.088
-                ) 
+                )
             { vars.completedSplits.Add("10_makers_low"); return true; }
         }
     }
@@ -971,15 +980,23 @@ split
         {
             if(vars.BoundsCheckCircLat(vars.positionVec, new double[]{2464.7, 1650.2}, 2.0))
             { vars.completedSplits.Add("tfw03_naltuk"); return true; }
-            
+
         }
     }
-    if(settings["tfw04_ourea"] && !vars.completedSplits.Contains("tfw04_ourea"))
+    if(settings["tfw04a_shamans_path"] && !vars.completedSplits.Contains("tfw04a_shamans_path"))
+    {
+        if(current.invulnerable == 1 && vars.completedFacts.Contains("fact_tfw_shamans_path"))
+        {
+            if(vars.BoundsCheckCircLat(vars.positionVec, new double[]{2196.6, 2806.7}, 4.0))
+            { vars.completedSplits.Add("tfw04a_shamans_path"); return true; }
+        }
+    }
+    if(settings["tfw04b_ourea"] && !vars.completedSplits.Contains("tfw04b_ourea"))
     {
         if(current.invulnerable == 1 && vars.completedFacts.Contains("fact_tfw_ourea"))
         {
             if(vars.BoundsCheckCircLat(vars.positionVec, new double[]{2211.9, 2806.4}, 4.0))
-            { vars.completedSplits.Add("tfw04_ourea"); return true; }
+            { vars.completedSplits.Add("tfw04b_ourea"); return true; }
         }
     }
     if(settings["tfw05_tfw_hg"] && !vars.completedSplits.Contains("tfw05_tfw_hg"))
