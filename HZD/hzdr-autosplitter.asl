@@ -774,15 +774,12 @@ split
             { vars.completedSplits.Add("17_eclipse_base"); return true; }
         }
     }
-    if(settings["18_zero_dawn"] && !vars.completedSplits.Contains("18_zero_dawn"))
-    { // should be post fact, but they are very close together
-        if(old.loading == 0 && current.loading > 0)
-        {
-            if(vars.BoundsCheckCyl(vars.positionVec, new double[]{-1104.7, 520.8}, 3.0, new double[]{270, 275}))
-            { vars.completedSplits.Add("18_zero_dawn"); return true; }
-        }
-    }
     if(vars.completedFacts.Contains("fact_zero_dawn")) {
+    if(settings["18_zero_dawn"] && !vars.completedSplits.Contains("18_zero_dawn"))
+    { // first load post-fact, or wait for porting
+        if(current.loading > 0 || vars.BoundsCheckCyl(vars.positionVec, new double[]{-1104.7, 520.8}, 3.0, new double[]{270, 275}))
+        { vars.completedSplits.Add("18_zero_dawn"); return true; }
+    }
     if(settings["19_sun_ring"] && !vars.completedSplits.Contains("19_sun_ring"))
     {
         if(current.loading > 0 && vars.completedFacts.Contains("fact_sun_ring"))
