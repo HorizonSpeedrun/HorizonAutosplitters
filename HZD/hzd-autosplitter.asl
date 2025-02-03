@@ -18,14 +18,14 @@ state("HorizonZeroDawn", "v181/7517962-Steam")
 }
 state("HorizonZeroDawn", "v181/7517962-GoG")
 {
-    byte24 aobPosition : 0x07149CC0, 0x30, 0x120;
-    byte invulnerable : 0x07149CC0, 0x30, 0x1F0, 0x60;
+    byte24 aobPosition : 0x07146F88, 0x30, 0x120;
+    byte invulnerable : 0x07146F88, 0x30, 0x1F0, 0x60;
 
     uint pause : 0x0714C728, 0x20;
     byte frameTimeIGT : 0x0714C728, 0x158;
     double totalTimePlayed: 0x0714C728, 0x160;
     uint loading : 0x0714C728, 0x4B4;
-    byte windowActiveInd : 0x0714F538;
+    byte windowActiveInd : 0x0714C800;
 
     ulong worldPtr : 0x0714C728;
 }
