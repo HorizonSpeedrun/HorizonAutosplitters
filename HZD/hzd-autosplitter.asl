@@ -203,7 +203,8 @@ startup
     AddSplitSetting("09_ambush", "Ambush", "FT post Ersa investigation", "ngp_overall");
     AddSplitSetting("10_makers_low", "Maker's End", "Cutscene entering the Tower", "ngp_overall");
     AddSplitSetting("11_fas_tower", "FAS Tower", "FT post Sylens", "ngp_overall");
-    AddSplitSetting("12_war_chief", "War Chief", "FT after the pit fight", "ngp_overall");
+    AddSplitSetting("12_war_chief", "War Chief (FT)", "FT after the pit fight (will not split at all if you don't FT away; and also not skip)", "ngp_overall");
+    AddSplitSettingF("12a_war_chief", "War Chief (End of 2nd Sona dialogue)", "End of talking to Sona the second time in the pit", "ngp_overall");
     AddSplitSetting("13_camps", "Eclipse Camps", "End of talking to Sona at ROM tall building", "ngp_overall");
     AddSplitSetting("14_rom", "Ring of Metal", "Any FT post Ring of Metal", "ngp_overall");
     AddSplitSetting("15_grave_hoard", "Grave Hoard", "Any FT post Grave Hoard", "ngp_overall");
@@ -251,6 +252,7 @@ startup
     vars.completedFacts.Capacity = 100;
     vars.timeHelperCamps = 0;
     vars.timeHelperRidge = 0;
+    vars.sequenceHelperWarChief = 0;
 
     vars.DbgSizeSplits = -1;
     vars.DbgSizeFacts = -1;
@@ -271,6 +273,7 @@ onReset
     vars.completedFacts.Clear();
     vars.timeHelperCamps = 0;
     vars.timeHelperRidge = 0;
+    vars.sequenceHelperWarChief = 0;
 }
 
 init
@@ -749,11 +752,49 @@ split
     }
     if(settings["12_war_chief"] && !vars.completedSplits.Contains("12_war_chief"))
     {
-        if(current.loading > 0 && vars.completedFacts.Contains("fact_war_chief"))
+        if(vars.completedFacts.Contains("fact_war_chief") && !vars.BoundsCheckCircLat(vars.positionVec, new double[]{3299, -933}, 75.0))
         {
             // FT out of the pit is the trigger here
-            if(!vars.BoundsCheckCircLat(vars.positionVec, new double[]{3299, -933}, 75.0))
-            { vars.completedSplits.Add("12_war_chief"); return true; }
+            if(current.loading > 0)
+            {
+                vars.completedSplits.Add("12_war_chief");
+                return true;
+            }
+
+            // pause 0 means we rode away without FT -> no auto split for this selected split
+            if(current.pause == 0)
+            {
+                vars.completedSplits.Add("12_war_chief");
+            }
+        }
+    }
+    if(settings["12a_war_chief"] && !vars.completedSplits.Contains("12a_war_chief"))
+    {
+        // Talking to Sona the first time
+        if(vars.completedFacts.Contains("fact_war_chief"))
+        {
+            if(vars.sequenceHelperWarChief == 0)
+            {
+                // Scanning the document
+                if(vars.BoundsCheckCircLat(vars.positionVec, new double[]{3280, -948}, 5.0))
+                { vars.sequenceHelperWarChief = 1; }
+            }
+            else if(vars.sequenceHelperWarChief == 1)
+            {
+                // Talking the second time
+                if(current.invulnerable > 0 && vars.BoundsCheckCircLat(vars.positionVec, new double[]{3297.2, -934.9}, 5.0)) // Z 195.9
+                { vars.sequenceHelperWarChief = 2; }
+            }
+            else if(vars.sequenceHelperWarChief == 2)
+            {
+                // End of talking
+                if(current.invulnerable == 0)
+                {
+                    vars.completedSplits.Add("12a_war_chief");
+                    vars.sequenceHelperWarChief = 0;
+                    return true;
+                }
+            }
         }
     }
     if(settings["13_camps"] && !vars.completedSplits.Contains("13_camps"))
