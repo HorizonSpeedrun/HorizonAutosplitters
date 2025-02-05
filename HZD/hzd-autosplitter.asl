@@ -188,7 +188,7 @@ startup
 	};
 
     AddSplitSettingF("res_main_menu", "Reset on Main Menu", "Reset run when quitting to main menu", null);
-    
+
     settings.Add("ngp_overall",true, "NG+ Run");
     AddSplitSetting("01_ngp_start", "NG+ Start", "Note:\nDue to the information available, we cannot differentiate between resuming the cutscene and actually skipping it without starting the timer too late.\nOnce you are given the prompt to skip the cutscene, both Back and Skip will start the timer.\nPause via the Pause button or tabbing should be covered.", "ngp_overall");
     AddSplitSettingF("02_sawtooth_cs", "Sawtooth Looting", "On looting the Sawtooth", "ngp_overall");
