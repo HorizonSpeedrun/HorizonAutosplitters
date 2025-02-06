@@ -1,18 +1,18 @@
 // Created by ISO2768mK and DorianSnowball
 // Version detection from the Death Stranding and Alan Wake ASL
 
-state("HorizonZeroDawnRemastered", "v1.4.63.0-Steam")
+state("HorizonZeroDawnRemastered", "v1.5.89.0-Steam")
 {
-    byte24 aobPosition : 0x099A8C00, 0xA0, 0x00, 0x28, 0x150; // 3 doubles
-    byte invulnerable : 0x099A8C00, 0xA0, 0x00, 0x28, 0x208, 0x60;
+    byte24 aobPosition : 0x099A8BA8, 0xA0, 0x00, 0x28, 0x150; // 3 doubles
+    byte invulnerable : 0x099A8BA8, 0xA0, 0x00, 0x28, 0x208, 0x60;
 
-    uint pause : 0x099A9A38, 0x20;
-    byte frameTimeIGT : 0x099A9A38, 0x158;
-    double totalTimePlayed: 0x099A9A38, 0x160; // time shown in statistics; for ridge delayed split
-    uint loading : 0x099A9A38, 0x4DC;
-    // byte windowActiveInd : 0x099A9A38, 0x172; // 0 -> tabbed in, 1 -> tabbed out => not needed
+    uint pause : 0x099A9A00, 0x20;
+    byte frameTimeIGT : 0x099A9A00, 0x158;
+    double totalTimePlayed: 0x099A9A00, 0x160; // time shown in statistics; for ridge delayed split
+    uint loading : 0x099A9A00, 0x4DC;
+    // byte windowActiveInd : 0x099A9A00, 0x172; // 0 -> tabbed in, 1 -> tabbed out => not needed
 
-    ulong worldPtr : 0x099A9A38;
+    ulong worldPtr : 0x099A9A00;
 }
 /*
 Placeholder for Epic Games version
@@ -40,7 +40,7 @@ check for je, test and mov opcode preceding in order that op -> we need the addr
 
 Get the value after "HorizonZeroDawnRemastered+" -> this is the offset we need
 
-The other player base address should be derivable by subtracting 0x0E38 from that offset
+The other player base address should be derivable by subtracting 0x0E58 from that offset (was 0x0E38 before patch 1.5)
 */
 
 startup
@@ -265,9 +265,9 @@ init
     var hash = vars.CalcModuleHash(module);
 
     version = "";
-    if (hash == "B129CBC1F2150269E035B957AA6AABEE4947611E0470DEC234E2D14E3B471F8E")
+    if (hash == "2F33B7AECD3FDF2F806A1A9CB387F40A3315779E652BA1EFA43AEC3A36DBF0D7")
     {
-        version = "v1.4.63.0-Steam";
+        version = "v1.5.89.0-Steam";
     }
     /*
     else if (hash == "????")
