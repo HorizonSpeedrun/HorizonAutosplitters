@@ -2,50 +2,50 @@
 // Updates:
 // Gworld (state{} action), Gengine (state{} action), FNamePool (vars.Funcs.setGameVersion()) and executable hashes (vars.Funcs.setGameVersion())
 
-state("LegoHorizonAdventures-Win64-Shipping", "v1.3.0.0-Steam"){
+state("LegoHorizonAdventures-Win64-Shipping", "v1.4.0.0-Steam"){
     // GWorld, levelFname
-    ulong levelFName : 0x890A1B8, 0x18;
+    ulong levelFName : 0x890E738, 0x18;
     // GWorld, Levels, Levels[1], WorldContainer, sceneFName
-    ulong sceneFName : 0x890A1B8, 0x170, 0x8, 0x20, 0x18;
+    ulong sceneFName : 0x890E738, 0x170, 0x8, 0x20, 0x18;
 
     // GEngine, GameInstance, 0x108, 0x1D0, goldBricks
-    int goldBricks : 0x8907328, 0x1088, 0x108, 0x1D0, 0x2A4;
+    int goldBricks : 0x890B8A8, 0x1088, 0x108, 0x1D0, 0x2A4;
     // Gold bricks for the coop player:
-    int goldBricksRemote : 0x8907328, 0xA58, 0xE8, 0xD00, 0x2B8, 0x8;
+    int goldBricksRemote : 0x890B8A8, 0xA58, 0xE8, 0xD00, 0x2B8, 0x8;
 
     // Loading flags:
     // GEngine, GameInstance, 0x108, GlowMusicSubsystem, GlowMusicGameplayHandler, Flag
-    bool isPaused : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x1EE;
-    bool isCinematic : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x1EF;
-    bool isConversation : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x1F1;
-    bool isLoading : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x208;
-    bool isFadeToBlack : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x209;
-    bool isBetweenWorlds : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x20A;
-    bool isWorldTransition : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x20B;
+    bool isPaused : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x1EE;
+    bool isCinematic : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x1EF;
+    bool isConversation : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x1F1;
+    bool isLoading : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x208;
+    bool isFadeToBlack : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x209;
+    bool isBetweenWorlds : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x20A;
+    bool isWorldTransition : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x20B;
 }
 
 // EpicGames version's memory addresses are the same as the Steam version, as for patch
 // 1.3, but an independant state is included here in case this changes in the future:
-state("LegoHorizonAdventures-Win64-Shipping", "v1.3.0.0-EpicGames"){
+state("LegoHorizonAdventures-Win64-Shipping", "v1.4.0.0-EpicGames"){
     // GWorld, levelFname
-    ulong levelFName : 0x890A1B8, 0x18;
+    ulong levelFName : 0x890E738, 0x18;
     // GWorld, Levels, Levels[1], WorldContainer, sceneFName
-    ulong sceneFName : 0x890A1B8, 0x170, 0x8, 0x20, 0x18;
+    ulong sceneFName : 0x890E738, 0x170, 0x8, 0x20, 0x18;
 
     // GEngine, GameInstance, 0x108, 0x1D0, goldBricks
-    int goldBricks : 0x8907328, 0x1088, 0x108, 0x1D0, 0x2A4;
+    int goldBricks : 0x890B8A8, 0x1088, 0x108, 0x1D0, 0x2A4;
     // Gold bricks for the coop player:
-    int goldBricksRemote : 0x8907328, 0xA58, 0xE8, 0xD00, 0x2B8, 0x8;
+    int goldBricksRemote : 0x890B8A8, 0xA58, 0xE8, 0xD00, 0x2B8, 0x8;
 
     // Loading flags:
     // GEngine, GameInstance, 0x108, GlowMusicSubsystem, GlowMusicGameplayHandler, Flag
-    bool isPaused : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x1EE;
-    bool isCinematic : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x1EF;
-    bool isConversation : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x1F1;
-    bool isLoading : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x208;
-    bool isFadeToBlack : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x209;
-    bool isBetweenWorlds : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x20A;
-    bool isWorldTransition : 0x8907328, 0x1088, 0x108, 0x368, 0x288, 0x20B;
+    bool isPaused : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x1EE;
+    bool isCinematic : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x1EF;
+    bool isConversation : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x1F1;
+    bool isLoading : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x208;
+    bool isFadeToBlack : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x209;
+    bool isBetweenWorlds : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x20A;
+    bool isWorldTransition : 0x890B8A8, 0x1088, 0x108, 0x368, 0x288, 0x20B;
 }
 
 // Script is executed
@@ -125,18 +125,18 @@ startup{
         return hexHashString;
     });
 
-    // Default variables (Patch 1.3.0.0 Steam version):
-    version = "v1.3.0.0-Steam";
-    vars.FNamePoolOffset = 0x086E7840;
+    // Default variables (Patch 1.4.0.0 Steam version):
+    version = "v1.4.0.0-Steam";
+    vars.FNamePoolOffset = 0x86EBDC0;
     // Determines the running game version and initialize variables acordingly:
-    // Patch 1.3.0.0 EpicGames:
+    // Patch 1.4.0.0 EpicGames:
     vars.Funcs.setGameVersion = (Action<string>)((hash) => {
-        if(hash == "9F14EEFC50B47239845C35B3E90BA81629750062840C9BDBE0CBBB2A29CB6B88"){
+        if(hash == "5EF34C4A1D75419D344F1C6B24C5354E02CB8E633776C95FEC608151410A2C1F"){
             version = "v1.3.0.0-EpicGames";
-            vars.FNamePoolOffset = 0x086E7840;
+            vars.FNamePoolOffset = 0x86EBDC0;
             print("Detected game version: " + version);
-        // Patch 1.3.0.0 Steam:
-        }else if(hash == "EEBFB44BDE489A60B047050788A7AE9D4D9574F15B8DF60292379DCD3719E4C4"){
+        // Patch 1.4.0.0 Steam:
+        }else if(hash == "7344F667E834475C75A0A03FA238E6FC5FE979780FFE755340B46E80F2E4BCCA"){
             // Don't do anything, the default variables are the Steam ones...
             print("Detected game version: " + version);
         }
