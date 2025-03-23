@@ -315,6 +315,11 @@ init
     vars.DbgSizeFacts = -1;
 }
 
+onStart
+{
+    timer.IsGameTimeInitialized = true;
+}
+
 update
 {
     if (current.aobPosition != null) // positions retain their old value on RFS to not trigger out of bounds checks for some splits
