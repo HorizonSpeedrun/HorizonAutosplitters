@@ -293,6 +293,7 @@ init
 
 onStart
 {
+    // For OBS load-removal of console versions
     timer.IsGameTimeInitialized = true;
 }
 
