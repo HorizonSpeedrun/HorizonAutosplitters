@@ -230,11 +230,126 @@ startup
     // ------------------------------------------------------------------
 
     AddSplitSettingF("res_main_menu", "Reset on Main Menu", "Reset run when quitting to main menu (shouldn't trigger on game crash)", null);
-    settings.Add("ngp_overall", true, "NG+ Run");
-    settings.Add("any_additional", false, "Any% additional");
-    settings.Add("ngp_bs", false, "NG+ Burning Shores");
-    settings.Add("100_bs", false, "100% Burning Shores (NG+) additional");
+    AddSplitSetting("ngp_overall", "NG+ Run", "Main game splits used for NG+, also works for NG", null);
+        AddSplitSetting("ngp_start", "NG+ Start", "Trigger run start on top of the cable car ride", "ngp_overall");
+        AddSplitSetting("ngp_a1_barren_light", "Barren Light (FT)", "Fast travelling after completing To The Brink", "ngp_overall");
+        AddSplitSetting("ngp_a1_embassy", "Embassy", "Cutscene skip after defeating Grudda", "ngp_overall");
+        AddSplitSettingF("ngp_a1_tallneck", "Tallneck (FT)", "Fast travelling to the Tallneck after Embassy", "ngp_overall");
+        AddSplitSetting("ngp_a1_igniter", "Igniter", "Exploding the Latopolis firegleam at entry", "ngp_overall");
+        AddSplitSetting("ngp_a1_latopolis", "Latopolis", "Exploding the Latopolis firegleam at exit", "ngp_overall");
+        AddSplitSetting("ngp_a1_tau", "Tau", "Overriding the Tau Core after the Grimhorn fight", "ngp_overall");
+        AddSplitSetting("ngp_a1_base", "Base", "Skipping the cutscene exiting the Base to the west", "ngp_overall");
+        AddSplitSetting("ngp_a2_capsule", "Capsule", "Fast travelling to the Hive campfire after starting Poseidon", "ngp_overall");
+        AddSplitSettingF("ngp_a2_memorial_grove", "Memorial Grove", "Talking to Dekka when entering the Grove", "ngp_overall");
+        AddSplitSetting("ngp_a2_kotallo", "Kotallo Skip", "Skipping the custscene when entering the Bulwark", "ngp_overall");
+        AddSplitSetting("ngp_a2_bulwark", "Bulwark", "Skipping the cutscene destroying the Bulwark", "ngp_overall");
+        AddSplitSetting("ngp_a2_alva", "Alva", "Skipping the cutscene when meeting Alva after the Quen fight", "ngp_overall");
+        AddSplitSetting("ngp_a2_demeter_ft", "Demeter (FT)", "Fast travelling after retrieving Demeter", "ngp_overall");
+        AddSplitSettingF("ngp_a2_demeter_gaia", "Demeter Merge", "When merging GAIA with Demeter", "ngp_overall");
+        AddSplitSetting("ngp_a2_beta", "Beta", "Fast travelling away from the Base after retrieving Beta", "ngp_overall");
+        AddSplitSetting("ngp_a2_aether_ft", "Aether (FT)", "Fast travelling after retrieving Aether", "ngp_overall");
+        AddSplitSettingF("ngp_a2_aether_gaia", "Aether Merge", "When merging GAIA with Aether", "ngp_overall");
+        AddSplitSetting("ngp_a2_poseidon_ft", "Poseidon (FT)", "Fast travelling after retrieving Poseidon", "ngp_overall");
+        AddSplitSettingF("ngp_a2_poseidon_gaia", "Poseidon Merge", "When merging GAIA with Poseidon", "ngp_overall");
+        AddSplitSetting("ngp_a3_thunderjaw", "Thunderjaw (San Fran)", "Skipping the cutscene speaking to Alva in SF", "ngp_overall");
+        AddSplitSetting("ngp_a3_thebes", "Thebes", "Fast travelling away from Thebes", "ngp_overall");
+        AddSplitSetting("ngp_a3_gemini", "Gemini", "Skipping the cutscene after completing Gemini (flashbang)", "ngp_overall");
+        AddSplitSetting("ngp_a3_regalla", "Regalla", "Fast travelling away from the Grove after dealing with Regalla", "ngp_overall");
+        AddSplitSetting("ngp_a3_singularity","Singularity", null, "ngp_overall");
+            AddSplitSettingF("ngp_a3_sing_start", "Point of no return", "Skipping the cutscene starting the Sinularity mission", "ngp_a3_singularity");
+            AddSplitSetting("ngp_a3_fz_skip", "FZ Skip", "On RFS to skip half of the final mission", "ngp_a3_singularity");
+            AddSplitSettingF("ngp_a3_eric", "Eric", "On skipping the cutscene after defeating Eric", "ngp_a3_singularity");
+        AddSplitSetting("ngp_a3_tilda", "Tilda", "On triggering the cutscene ending the main game runs (NOT on defeating Specter Prime)", "ngp_overall");
+    AddSplitSettingF("ng_additional", "NG / Any% additional", "Prologue splits for Any% / NG runs. Also enable the NG+ splits", null)
+        AddSplitSetting("ng_start", "NG / Any% Start", "Trigger run start at the beginning of the prologue", "ng_additional");
+        AddSplitSetting("ng_frost_sling", "Frost Sling", "Skipping the projector hologram before getting the Frost Sling", "ng_additional");
+        AddSplitSetting("ng_fake_gaia", "Fake GAIA", "When entering the GAIA room in the FZ datacenter", "ng_additional");
+        AddSplitSetting("ng_cable_car", "Cable Car", "On the top of cable car (same as NG+ start, but as split)", "ng_additional");
 
+    AddSplitSettingF("bs_mq", "NG+ Burning Shores", "Main game splits used for NG+ Burning Shores, also works for NG", null);
+        AddSplitSetting("bs_start", "NG+ Burning Shores Start", "Trigger run start on the way to the Burning Shores", "bs_mq");
+        AddSplitSettingF("bs_start_split", "NG+ Burning Shores Start (as split)", "Trigger a split on the way to the Burning Shores (e.g. for combined main game and BS runs)", "bs_mq");
+        AddSplitSetting("bs_skiff1", "Skiff", "Different options for the split after the first fight", "bs_mq");
+            AddSplitSettingF("bs_skiff1_fight", "Post-fight cutscene", "Skipping the cutscene after defeating the machines", "bs_skiff1");
+            AddSplitSetting("bs_skiff1_skiff", "Sitting down on the skiff", null, "bs_skiff1");
+            AddSplitSettingF("bs_skiff1_skiff_move", "Skiff starts moving", null, "bs_skiff1");
+            AddSplitSettingF("bs_skiff1_fleets_end", "Arriving in Fleet's End", "Skipping the first cutscene after the skiff ride", "bs_skiff1");
+        AddSplitSettingF("bs_bilegut", "Bilegut", "Passing the vines at the Tower entrance", "bs_mq");
+        AddSplitSetting("bs_tower", "Tower", "Different options for the Tower split", "bs_mq");
+            AddSplitSettingF("bs_tower_seyka", "Talking to Seyka", "Start talking to Seyka after completing the tower", "bs_tower");
+            AddSplitSetting("bs_tower_ft", "Fleet's End FT", "Fast travelling after the tower", "bs_tower");
+        AddSplitSetting("bs_observatory", "Observatory", "Triggering the console in Londra's living quarters", "bs_mq");
+        AddSplitSetting("bs_transmitter_ft", "Transmitter (FT)", "Fast-travelling from the Transmitter (100% splits have another option here)", "bs_mq");
+        AddSplitSetting("bs_control_nodes", "Heaven's Rest - Control Nodes", "Fast travelling out of the control node area", "bs_mq");
+        AddSplitSettingF("bs_acension_hall", "Heaven's Rest - Acension Hall", "Talking to Seyka after scanning the ship (or completing the dry wiggle)", "bs_mq");
+        AddSplitSetting("bs_heavens_rest", "Heaven's Rest - Zeth", "Fast travelling away after defeating Zeth", "bs_mq");
+        AddSplitSetting("bs_beach", "Beach", "Skipping the cutscene talking to Seyka at the beach", "bs_mq");
+        AddSplitSetting("bs_ww_override", "Waterwing Override", "Crafting the Waterwing override", "bs_mq");
+        AddSplitSetting("bs_pangea_crossing", "Pangea's Park - Crossing", "Skipping the cutscene ", "bs_mq");
+        AddSplitSettingF("bs_pangea_nova", "Pangea's Park - Nova", "Interacting with the Nova's console", "bs_mq");
+        AddSplitSetting("bs_pangea_slaugtherspine_ft", "Pangea's Park - Slaugtherspine (FT)", "Fast travelling away from the Apex Spiny (100% splits have another option here)", "bs_mq");
+        AddSplitSetting("bs_horus_cooling", "Horus - Cooling", "Skipping the cutscene after destroying the cooling pipe", "bs_mq");
+        AddSplitSettingF("bs_horus_sink1", "Horus - Underbelly sink", "On RFS after the destroying the underbelly heat sink", "bs_mq");
+        AddSplitSetting("bs_horus_sink2", "Horus - Side sink", "On RFS after the destroying the side heat sink", "bs_mq");
+        AddSplitSetting("bs_horus_arms", "Horus - Arms", "Skipping the cutscene after destroying the main heat sink", "bs_mq");
+        AddSplitSetting("bs_londra", "Londra", "Skipping the cutscene after defeating Londra", "bs_mq");
+        AddSplitSetting("bs_seyka", "Seyka", "End of the BS main quest runs", "bs_mq");
+
+    AddSplitSettingF("bs_100", "100% Burning Shores additional", "Additional 100% splits for Burning Shores (does not check actual progress)", null);
+        AddSplitSettingF("bs_aerial_ne", "Aerial NE", "Aerial NE ends at the observatory", "bs_100");
+            AddSplitSetting("bs_aerial_ne_save", "On Aerial completion" , "On checkpoint after closing the aerial", "bs_aerial_ne");
+            AddSplitSettingF("bs_aerial_ne_load", "RFS / FT after Aerial completion" , "Any loads after closing the aerial", "bs_aerial_ne");
+        AddSplitSetting("bs_trinket_pot", "Trinket: Old Pot", "Old Pot is at the northern Slitherfang site", "bs_100");
+            AddSplitSettingF("bs_trinket_pot_save", "On Trinket collection" , "On checkpoint collecting the trinket", "bs_trinket_pot");
+            AddSplitSetting("bs_trinket_pot_load", "RFS / FT after Trinket collection" , "Any loads after collecting the trinket", "bs_trinket_pot");
+        AddSplitSetting("bs_transmitter_cs", "Transmitter (CS)", "Skipping the cutscene talking to Seyka (remember to deselect the BS main quest split)", "bs_100");
+        AddSplitSettingF("bs_aerial_n", "Aerial North", "Aerial North ends at Capitol Records", "bs_100");
+            AddSplitSettingF("bs_aerial_n_save", "On Aerial completion" , "On checkpoint after closing the aerial", "bs_aerial_n");
+            AddSplitSetting("bs_aerial_n_load", "RFS / FT after Aerial completion" , "Any loads after closing the aerial", "bs_aerial_n");
+        AddSplitSetting("bs_trinket_music_box", "Trinket: Music Box", "Music Box is in the Scorcher cave", "bs_100");
+            AddSplitSettingF("bs_trinket_music_box_save", "On Trinket collection" , "On checkpoint collecting the trinket", "bs_trinket_music_box");
+            AddSplitSetting("bs_trinket_music_box_load", "RFS / FT after Trinket collection" , "Any loads after collecting the trinket", "bs_trinket_music_box");
+        AddSplitSetting("bs_theta", "Cauldron Theta", null, "bs_100");
+            AddSplitSettingF("bs_theta_entry", "Entry", "When going down the corridor entering the cauldron", "bs_theta");
+            AddSplitSettingF("bs_theta_override", "Node Override", "Overriding the node lowering the shield", "bs_theta");
+            AddSplitSetting("bs_theta_completion", "Completion", "Fast travelling away after completion", "bs_theta");
+        AddSplitSetting("bs_beach_collectibles", "Beach Collectibles", null, "bs_100");
+            AddSplitSettingF("bs_figure_parking_lot", "Pangea Figure: Parking Lot (load)", "RFS / FT after picking up figurine", "bs_beach_collectibles");
+            AddSplitSettingF("bs_trinket_flask", "Trinket: Cherished Flask (load)", "RFS / FT after picking up Cherished Flask", "bs_beach_collectibles");
+        AddSplitSettingF("bs_trinket_bellowback", "Trinket by Bellowback (load)", "RFS / FT after picking up Delver's Cap", "bs_100");
+        AddSplitSetting("bs_trinket_clamberjaws", "Trinket by Clamberjaws (load)", "RFS / FT after picking up Lucky Porter", "bs_100");
+        AddSplitSetting("bs_mh", "Murmuring Hollow", null, "bs_100");
+            AddSplitSettingF("bs_mh_door", "Gildun Door", "Interacting with the door (Gildun)", "bs_mh");
+            AddSplitSettingF("bs_mh_friend_completion", "Friend% completion", "Final split of the Friend% CE", "bs_mh");
+            AddSplitSetting("bs_mh_gildun", "Gildun (load)", "FT(!) after completing Gildun's quest", "bs_mh");
+        AddSplitSetting("bs_pangea_slaugtherspine_cs", "Pangea's Park - Slaugtherspine (CS)", "Skipping the cutscene after defeating Apex Spiny (remember to deselect the BS main quest split)", "bs_100");
+        AddSplitSetting("bs_aerial_e", "Aerial East", "Aerial East ends above Pangea Park", "bs_100");
+            AddSplitSettingF("bs_aerial_e_save", "On Aerial completion" , "On checkpoint after closing the aerial", "bs_aerial_e");
+            AddSplitSetting("bs_aerial_e_load", "RFS / FT after Aerial completion" , "Any loads after closing the aerial", "bs_aerial_e");
+        AddSplitSettingF("bs_seyka_ft", "Seyka (FT)", "FT(!) after talking to Seyka, credits and RFS (remember to deselect the BS main quest split)", "bs_100");
+        AddSplitSetting("bs_pier", "Santa Monica Pier", null, "bs_100");
+            AddSplitSettingF("bs_sb_air", "Stormbird (getting kicked off)", "On getting kicked off by the Apex Stormbird", "bs_pier");
+            AddSplitSetting("bs_sb_kill", "Strombird (on kill)", "On killing the Stormbird", "bs_pier");
+            AddSplitSettingF("bs_sb_aerial_door", "Aerial Door (post SB)", "On interacting with the door for the Aerial (after killing SB)", "bs_pier");
+        AddSplitSetting("bs_aerial_w", "Aerial West", "Aerial West ends looking towards Santa Monica Pier", "bs_100");
+            AddSplitSetting("bs_aerial_w_save", "On Aerial completion" , "On checkpoint after closing the aerial", "bs_aerial_w");
+            AddSplitSettingF("bs_aerial_w_load", "RFS / FT after Aerial completion" , "Any loads after closing the aerial", "bs_aerial_w");
+        AddSplitSettingF("bs_trinket_hammer", "Trinket by Tideripper (pickup)", "On picking up the Hammer in the cave by the Tideripper", "bs_100");
+        AddSplitSetting("bs_sq_splinter", "SQ: The Splinter Within", null, "bs_100");
+            AddSplitSettingF("bs_splinter_tower", "LAIA Tower Island", "FT away from the Airport Tower Island", "bs_sq_splinter");
+            AddSplitSettingF("bs_splinter_rokomo", "Rokomo", "On skipping the Rokomo cutscene", "bs_sq_splinter");
+            AddSplitSetting("bs_splinter_focus_ft", "Enki's Focus (FT)", "FT after picking up the focus", "bs_sq_splinter");
+        AddSplitSetting("bs_sq_wake", "SQ: In His Wake", null, "bs_100");
+            AddSplitSettingF("bs_wake_outside", "Outside", "Skipping the cutscene after completing the outside part", "bs_sq_wake");
+            AddSplitSettingF("bs_wake_dig", "Dig site", "Inserting the Key in the Dig", "bs_sq_wake");
+            AddSplitSettingF("bs_wake_pirik_cs", "Lan (CS)", "On opening Lan's cell", "bs_sq_wake");
+            AddSplitSetting("bs_wake_pirik_ft", "Lan (FT)", "On FT after opening Lan's cell", "bs_sq_wake");
+        AddSplitSettingF("bs_aerial_s", "Aerial South", "Aerial South is the one unlocked after completing all the other ones", "bs_100");
+            AddSplitSetting("bs_aerial_s_save", "On Aerial completion" , "On checkpoint after closing the aerial", "bs_aerial_s");
+            AddSplitSettingF("bs_aerial_s_load", "RFS / FT after Aerial completion" , "Any loads after closing the aerial", "bs_aerial_s");
+        AddSplitSetting("bs_sidequests", "Handing in the sidequests", "FT after handing in both sidequests", "bs_100");
+        AddSplitSetting("bs_arena", "Arena", "FT away from the Arena (no check)", "bs_100");
+        AddSplitSetting("bs_epilogue", "Epilogue", "Triggering the Epilogue cutscene in the base", "bs_100");
 
     vars.startingDB = new Tuple<string, double[]>[]{
         new Tuple<string, double[]>(
@@ -262,7 +377,6 @@ startup
     // ------------------------------------------------------------------
     // Data definition end
     // ------------------------------------------------------------------
-
 
     vars.splittingData = new List<Tuple<uint,int>>();
     vars.splittingData.Capacity = vars.splittingDB.Length;
