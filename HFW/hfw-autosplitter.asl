@@ -111,40 +111,42 @@ startup
     };
     vars.BoundsCheckCyl = BoundsCheckCyl;
 
-    const ushort MEMORYCHECK = (1<<15);
-    const ushort MEMORY_RISING = (1<<14);
-    const ushort MEMORY_FALLING = (0<<14);
+    const uint IGT_DELAY = (1<<16);
 
-    const ushort BOUNDSTYPE_MASK = (7<<11);
-    const ushort BOUNDSTYPE_AABB = (1<<11);
-    const ushort BOUNDSTYPE_CIRC = (2<<11);
-    const ushort BOUNDSTYPE_CYL = (3<<11);
-    const ushort BOUNDSTYPE_SPHERE = (4<<11);
-    const ushort BOUNDS_IO_MASK = (1<<10);
-    const ushort BOUNDS_INSIDE = (1<<10);
-    const ushort BOUNDS_OUTSIDE = (0<<10);
+    const uint MEMORYCHECK = (1<<15);
+    const uint MEMORY_RISING = (1<<14);
+    const uint MEMORY_FALLING = (0<<14);
 
-    const ushort SKIP_FLAGS = (1<<9);
-    const ushort SAVETGL = (1<<8);
-    const ushort LOAD_FLANK_RISING = (1<<7);
-    const ushort LOAD_FLANK_FALLING = (1<<6);
-    const ushort LOAD_HIGH = (1<<5);
-    const ushort LOAD_LOW = (1<<4);
-    const ushort LOAD_MASK = 0x00F0;
-    const ushort INVUL_FLANK_RISING = (1<<3);
-    const ushort INVUL_FLANK_FALLING = (1<<2);
-    const ushort INVUL_HIGH = (1<<1);
-    const ushort INVUL_LOW = (1<<0);
-    const ushort INVUL_MASK = 0x000F;
+    const uint BOUNDSTYPE_MASK = (7<<11);
+    const uint BOUNDSTYPE_AABB = (1<<11);
+    const uint BOUNDSTYPE_CIRC = (2<<11);
+    const uint BOUNDSTYPE_CYL = (3<<11);
+    const uint BOUNDSTYPE_SPHERE = (4<<11);
+    const uint BOUNDS_IO_MASK = (1<<10);
+    const uint BOUNDS_INSIDE = (1<<10);
+    const uint BOUNDS_OUTSIDE = (0<<10);
 
-    Func<ushort, ushort, bool> CheckFlags = (flagFunctionSetting, flagsCurrent) => {
-        if((flagFunctionSetting & SKIP_FLAGS) > 0) { return true; }
+    const uint SKIP_FLAGS = (1<<9);
+    const uint SAVETGL = (1<<8);
+    const uint LOAD_FLANK_RISING = (1<<7);
+    const uint LOAD_FLANK_FALLING = (1<<6);
+    const uint LOAD_HIGH = (1<<5);
+    const uint LOAD_LOW = (1<<4);
+    const uint LOAD_MASK = 0x00F0;
+    const uint INVUL_FLANK_RISING = (1<<3);
+    const uint INVUL_FLANK_FALLING = (1<<2);
+    const uint INVUL_HIGH = (1<<1);
+    const uint INVUL_LOW = (1<<0);
+    const uint INVUL_MASK = 0x000F;
+
+    Func<uint, uint, bool> CheckFlags = (flagFunctionSetting, flagsCurrent) => {
+        if((flagFunctionSetting & (SKIP_FLAGS | MEMORYCHECK)) > 0) { return true; }
         return ((flagFunctionSetting & flagsCurrent) > 0);
     };
     vars.CheckFlags = CheckFlags;
 
-    Func<uint, uint, byte, byte, byte, byte, ushort> CalcFlags = (oldLoad, curLoad, oldInvuln, curInvuln, oldSaveTgl, curSaveTgl) => {
-        ushort ret = 0;
+    Func<uint, uint, byte, byte, byte, byte, uint> CalcFlags = (oldLoad, curLoad, oldInvuln, curInvuln, oldSaveTgl, curSaveTgl) => {
+        uint ret = 0;
         if (curLoad > 0) { ret |= LOAD_HIGH; }
         else { ret |= LOAD_LOW; }
         if ((curLoad > 0) != (oldLoad > 0)) {
@@ -167,19 +169,21 @@ startup
         return ret;
     };
     vars.CalcFlags = CalcFlags;
+    vars.gameProcess = (Process)null;
 
-    Func<double[], bool> CheckSingleGameCondition = (dataVec) => {
-        ushort type = (ushort)(dataVec[0]);
+    Func<double[], int, bool> CheckSingleGameCondition = (dataVec, idxData) => {
+        uint type = (uint)(dataVec[0]);
         if (!vars.CheckFlags(type, vars.currentFlags)) { return false; }
         bool passedMem = true;
         if ((type & MEMORYCHECK) > 0)
         {
-            uint idxMemList = (uint)(dataVec[1]);
+            int idxMemList = (int)(dataVec[1]);
             passedMem = false;
-            if (idxMemList < vars.memoryDB.Count && vars.memoryDB[idxMemList].Update(game))
+            if (idxMemList >= 0 && idxMemList < vars.memoryDB.Count)
             {
-                if((vars.memoryDB[idxMemList].Old > 0) != (vars.memoryDB[idxMemList].Current > 0))
+                if(vars.memoryDB[idxMemList].Update(vars.gameProcess))
                 {
+                    vars.DebugOutput("Mem DB Index " + idxMemList.ToString() + "changed");
                     passedMem = (vars.memoryDB[idxMemList].Current > 0) ^ ((type & MEMORY_RISING) == 0);
                 }
             }
@@ -202,19 +206,42 @@ startup
                     return false;
             }
         }
+        else if((type & IGT_DELAY) > 0)
+        {
+            if (idxData < 0) { /* invalid */ return true; }
+            if (vars.splittingData[idxData].Item3 == 0)
+            {
+                vars.splittingData[idxData] = new Tuple<int,int,double>(
+                    vars.splittingData[idxData].Item1,
+                    vars.splittingData[idxData].Item1,
+                    vars.inGameTime
+                );
+                return false;
+            }
+            else
+            {
+                return ((vars.inGameTime - vars.splittingData[idxData].Item3) > dataVec[1]);
+            }
+        }
         else
         {
+            vars.InfoOutput("CONDITION CHECK: not implemented data received: " + dataVec.ToString() + " + " + idxData.ToString());
             return true;
         }
     };
     vars.CheckSingleGameCondition = CheckSingleGameCondition;
 
     vars.positionVec = new double[3];
-    vars.positionVec[0] = -8000; // initialize somewhere outside
-    vars.positionVec[1] = 0;
-    vars.positionVec[2] = 0;
+    Action resetVarsVals = () => {
+        vars.positionVec[0] = -8000; // initialize somewhere outside
+        vars.positionVec[1] = 0;
+        vars.positionVec[2] = 0;
 
-    vars.currentFlags = (ushort)0;
+        vars.currentFlags = (uint)0;
+        vars.inGameTime = (double)0; // currently unused
+    };
+    vars.resetVarsVals = resetVarsVals;
+    vars.resetVarsVals();
 
     Action<string, string, string, string> AddSplitSetting = (key, name, description, parent) => {
 		settings.Add(key, true, name, parent);
@@ -260,7 +287,7 @@ startup
             AddSplitSetting("ngp_a3_fz_skip", "FZ Skip", "On RFS to skip half of the final mission", "ngp_a3_singularity");
             AddSplitSettingF("ngp_a3_eric", "Eric", "On skipping the cutscene after defeating Eric", "ngp_a3_singularity");
         AddSplitSetting("ngp_a3_tilda", "Tilda", "On triggering the cutscene ending the main game runs (NOT on defeating Specter Prime)", "ngp_overall");
-    AddSplitSettingF("ng_additional", "NG / Any% additional", "Prologue splits for Any% / NG runs. Also enable the NG+ splits", null)
+    AddSplitSettingF("ng_additional", "NG / Any% additional", "Prologue splits for Any% / NG runs. Also enable the NG+ splits", null);
         AddSplitSetting("ng_start", "NG / Any% Start", "Trigger run start at the beginning of the prologue", "ng_additional");
         AddSplitSetting("ng_frost_sling", "Frost Sling", "Skipping the projector hologram before getting the Frost Sling", "ng_additional");
         AddSplitSetting("ng_fake_gaia", "Fake GAIA", "When entering the GAIA room in the FZ datacenter", "ng_additional");
@@ -365,8 +392,8 @@ startup
         ),
     };
 
-    vars.memoryDB = new MemoryWatcherList();
-    Action<uint, uint> FillMemoryDB = (offsetSceneManagerGame, offsetGameModule) => {
+    vars.memoryDB = new List<MemoryWatcher>();
+    Action<int, int> FillMemoryDB = (offsetSceneManagerGame, offsetGameModule) => {
         // 0
         //vars.memoryDB.Add()
 
@@ -378,21 +405,8 @@ startup
     // Data definition end
     // ------------------------------------------------------------------
 
-    vars.splittingData = new List<Tuple<uint,int>>();
+    vars.splittingData = new List<Tuple<int,int,double>>();
     vars.splittingData.Capacity = vars.splittingDB.Length;
-    Action ArmSplittingData = () => {
-        vars.splittingData.Clear();
-        for ( uint i = 0 ; i < vars.splittingDB ; ++i )
-        {
-            if (!settings[vars.splittingDB[i].Item1]) { continue; }
-            vars.splittingData.Add(
-                new Tuple<uint,int>(i, 0)
-            );
-        }
-        vars.DebugOutput("ArmSplittingData: " + vars.splittingData.Count.ToString() + " splits active");
-    };
-    vars.ArmSplittingData = ArmSplittingData;
-
 }
 
 init
@@ -404,8 +418,8 @@ init
     var hash = vars.CalcModuleHash(module);
     vars.DebugOutput(module.ModuleName + ": Module Size " + moduleSize + ", SHA256 Hash " + hash);
 
-    uint offsetGameModule = 0x08983150;
-    uint offsetSceneManagerGame = 0x08982DD0;
+    int offsetGameModule = 0x08983150;
+    int offsetSceneManagerGame = 0x08982DD0;
 
     version = "";
     if (hash == "9CEC6626AB60059D186EDBACCA4CE667573E8B28C916FCA1E07072002055429E")
@@ -438,6 +452,7 @@ init
     }
 
     vars.FillMemoryDB(offsetSceneManagerGame, offsetGameModule);
+    vars.gameProcess = game;
 }
 
 
@@ -447,6 +462,7 @@ update{
         Buffer.BlockCopy(current.aobPosition, 0, vars.positionVec, 0, 24);
     }
     vars.currentFlags = vars.CalcFlags(old.loading, current.loading, old.invulnerable, current.invulnerable, old.saveToggle, current.saveToggle);
+    // vars.inGameTime = current.xxx;
 }
 
 reset
@@ -460,11 +476,11 @@ reset
 }
 
 start{
-    for (int i = 0 ; i < vars.startingDB.Count ; ++i)
+    for (int i = 0 ; i < vars.startingDB.Length ; ++i)
     {
         if (settings[vars.startingDB[i].Item1])
         {
-            if (vars.CheckSingleGameCondition(vars.startingDB[i].Item2))
+            if (vars.CheckSingleGameCondition(vars.startingDB[i].Item2, -1))
             {
                 vars.InfoOutput("START: " + vars.startingDB[i].Item1);
                 return true;
@@ -485,15 +501,15 @@ split{
         for (j = vars.splittingData[i].Item2; j < vars.splittingDB[idxDB].Item2 ; ++j)
         {
             if (j > vars.splittingData[i].Item2) { break; }
-            if (vars.CheckSingleGameCondition(vars.splittingDB[idxDB].Item3[j]))
+            if (vars.CheckSingleGameCondition(vars.splittingDB[idxDB].Item3[j], i))
             {
                 vars.DebugOutput("Subsplit: " + vars.splittingDB[idxDB].Item1 + " , condition " + j.ToString());
-                vars.splittingData[i].Item2++;
+                vars.splittingData[i] = new Tuple<int,int,double>(idxDB, vars.splittingData[i].Item2 + 1, vars.splittingData[i].Item3);
             }
         }
-        if (j == vars.splittingDB[idxDB].Item2)
+        if (vars.splittingData[i].Item2 == vars.splittingDB[idxDB].Item2)
         {
-            vars.splittingData[i].Item2 = -1;
+            vars.splittingData[i] = new Tuple<int,int,double>(idxDB, -1, vars.splittingData[i].Item3);
             vars.InfoOutput("SPLIT: " + vars.splittingDB[idxDB].Item1);
             retVal = true;
         }
@@ -502,11 +518,22 @@ split{
 }
 
 onStart{
-    vars.ArmSplittingData();
+    if (game == null) { return; }
+    vars.DebugOutput("Arming Splitting Data");
+    vars.splittingData.Clear();
+    for ( int i = 0 ; i < vars.splittingDB.Length ; ++i )
+    {
+        if (!settings[vars.splittingDB[i].Item1]) { continue; }
+        vars.splittingData.Add(
+            new Tuple<int,int,double>(i, 0, 0)
+        );
+    }
+    vars.DebugOutput("Armed Splitting Data: " + vars.splittingData.Count.ToString() + " splits active");
 }
 
 onReset{
     vars.splittingData.Clear();
+    vars.resetVarsVals();
 }
 
 isLoading
@@ -518,4 +545,5 @@ exit
 {
     timer.IsGameTimePaused = false;
     vars.memoryDB.Clear();
+    vars.gameProcess = (Process)null;
 }
