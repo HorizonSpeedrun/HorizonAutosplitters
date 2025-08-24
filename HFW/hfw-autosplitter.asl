@@ -8,9 +8,21 @@ state("HorizonForbiddenWest", "v1.5.80.0-Steam")
     // toggles between 0 and 1 on every save (quick or auto)
     byte saveToggle : 0x08983150, 0x3F8;
     // Aloy's position:
-    byte24 aobPosition : 0x8982DA0, 0x1C10, 0x0, 0x10, 0xD8;
+    byte24 aobPosition : 0x08982DA0, 0x1C10, 0x0, 0x10, 0xD8;
     // Aloy's invulnerable flag:
-    byte invulnerable : 0x8982DA0, 0x1C10, 0x0, 0x10, 0xD0, 0x70;
+    byte invulnerable : 0x08982DA0, 0x1C10, 0x0, 0x10, 0xD0, 0x70; // 1 in dialogue, cutscenes and when flying
+    /*
+      Behavior:
+      Aloy not on mount -> ControlledEntity is nullpointer
+      Aloy on any mount in cutscene -> ControlledEntity is nullpointer
+      Aloy on mount on ground (landed / land-mount) -> Aloy invul is 0
+      Aloy flying -> Aloy invul is 1 and ControlledEntity points to flying mount,
+        Destructability is not nullpointer, 0x70 is 0 (mount is vulnerable)
+      Aloy on skiff (either Seyka (scripted) or Aloy) -> ControlledEntity is not nullpointer, Destructability is nullpointer
+      End of flight paths (watching through the holo in mid-air) is probably the only instance where the mount is marked invulnerable
+    */
+    // ControlledEntity -> Destructability
+    ulong mountDestructabilityResPtr : 0x08982DA0, 0x1C10, 0x0, 0x10, 0x80, 0xD0;
 }
 state("HorizonForbiddenWest", "v1.5.80.0-Epic")
 {
@@ -19,6 +31,7 @@ state("HorizonForbiddenWest", "v1.5.80.0-Epic")
     byte saveToggle : 0x0895EF50, 0x3F8;
     byte24 aobPosition : 0x0895EBC8, 0x1C10, 0x0, 0x10, 0xD8;
     byte invulnerable :  0x0895EBC8, 0x1C10, 0x0, 0x10, 0xD0, 0x70;
+    ulong mountDestructabilityResPtr : 0x0895EBC8, 0x1C10, 0x0, 0x10, 0x80, 0xD0;
 }
 
 /*
@@ -46,7 +59,7 @@ Get the value after "HorizonForbiddenWest+" -> this is the offset we need
 startup
 {
     Action<string> DebugOutput = (text) => {
-        if (false)
+        if (true)
         {
             print("[HFW Autosplitter Debug] " + text);
         }
@@ -107,7 +120,7 @@ startup
             // always outside
             return !chkForInside;
         }
-        return vars.BoundsCheckCircLat(pos, dataVec, 0, chkForInside);
+        return vars.BoundsCheckCircLat(pos, dataVec, index0, chkForInside);
     };
     vars.BoundsCheckCyl = BoundsCheckCyl;
 
@@ -145,15 +158,18 @@ startup
     };
     vars.CheckFlags = CheckFlags;
 
-    Func<uint, uint, byte, byte, byte, byte, uint> CalcFlags = (oldLoad, curLoad, oldInvuln, curInvuln, oldSaveTgl, curSaveTgl) => {
+    Func<dynamic, dynamic, uint> CalcFlags = (paraOld, paraCurrent) => {
         uint ret = 0;
-        if (curLoad > 0) { ret |= LOAD_HIGH; }
+        if (paraCurrent.loading > 0) { ret |= LOAD_HIGH; }
         else { ret |= LOAD_LOW; }
-        if ((curLoad > 0) != (oldLoad > 0)) {
+        if ((paraCurrent.loading > 0) != (paraOld.loading > 0)) {
             // one of the flanks is active
-            if (curLoad > 0) { ret |= LOAD_FLANK_RISING; }
+            if (paraCurrent.loading > 0) { ret |= LOAD_FLANK_RISING; }
             else { ret |= LOAD_FLANK_FALLING; }
         }
+        
+        bool curInvuln = ((paraCurrent.invulnerable > 0) && (paraCurrent.mountDestructabilityResPtr == 0));
+        bool oldInvuln = ((paraOld.invulnerable > 0) && (paraOld.mountDestructabilityResPtr == 0));
 
         if (curInvuln > 0) { ret |= INVUL_HIGH; }
         else { ret |= INVUL_LOW; }
@@ -163,7 +179,7 @@ startup
             else { ret |= INVUL_FLANK_FALLING; }
         }
 
-        if ((curSaveTgl > 0) != (oldSaveTgl > 0)) {
+        if ((paraCurrent.saveToggle > 0) != (paraOld.saveToggle > 0)) {
             ret |= SAVETGL;
         }
         return ret;
@@ -225,7 +241,7 @@ startup
         }
         else
         {
-            vars.InfoOutput("CONDITION CHECK: not implemented data received: " + dataVec.ToString() + " + " + idxData.ToString());
+            // no other condition apart from flags
             return true;
         }
     };
@@ -461,7 +477,7 @@ update{
     {
         Buffer.BlockCopy(current.aobPosition, 0, vars.positionVec, 0, 24);
     }
-    vars.currentFlags = vars.CalcFlags(old.loading, current.loading, old.invulnerable, current.invulnerable, old.saveToggle, current.saveToggle);
+    vars.currentFlags = vars.CalcFlags(old, current);
     // vars.inGameTime = current.xxx;
 }
 
