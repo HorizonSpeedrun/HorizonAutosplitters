@@ -4,6 +4,7 @@
 state("HorizonForbiddenWest", "v1.5.80.0-Steam")
 {
     ulong worldPtr : 0x08983150;
+    uint paused : 0x08983150, 0x20;
     uint loading : 0x08983150, 0x4B4;
     // toggles between 0 and 1 on every save (quick or auto)
     byte saveToggle : 0x08983150, 0x3F8;
@@ -27,6 +28,7 @@ state("HorizonForbiddenWest", "v1.5.80.0-Steam")
 state("HorizonForbiddenWest", "v1.5.80.0-Epic")
 {
     ulong worldPtr : 0x0895EF50;
+    uint paused : 0x0895EF50, 0x20;
     uint loading : 0x0895EF50, 0x4B4;
     byte saveToggle : 0x0895EF50, 0x3F8;
     byte24 aobPosition : 0x0895EBC8, 0x1C10, 0x0, 0x10, 0xD8;
@@ -94,6 +96,19 @@ startup
     };
     vars.BoundsCheckAABB = BoundsCheckAABB;
 
+    Func<double[], double[], int, bool, bool> BoundsCheckXYRBB = (pos, dataVec, index0, chkForInside) => {
+        // dataVec: [ 2x3-row-major-hom-trafo z_min z_max]
+        if (pos[2] < dataVec[index0 + 6] || pos[2] > dataVec[index0 + 6])
+        {
+            return !chkForInside;
+        }
+        double posV = dataVec[index0 + 3] * pos[0] + dataVec[index0 + 4] * pos[1] + dataVec[index0 + 5];
+        if (posV < 0 || posV > 1) { return !chkForInside; }
+        double posU = dataVec[index0 + 0] * pos[0] + dataVec[index0 + 1] * pos[1] + dataVec[index0 + 2];
+        return (posU >= 0 && posU <= 1) ^ !chkForInside;
+    }; // Bounding Box check allowing for rotation in XY, trafoData is expected to be 6 element vector for normalized transformation in XY
+    vars.BoundsCheckXYRBB = BoundsCheckXYRBB;
+
     Func<double[], double[], int, bool, bool> BoundsCheckCircLat = (pos, dataVec, index0, chkForInside) => {
         // dataVec: [r p_x p_y]
         double radius = dataVec[index0 + 0];
@@ -124,23 +139,27 @@ startup
     };
     vars.BoundsCheckCyl = BoundsCheckCyl;
 
-    const uint IGT_DELAY = (1<<16);
+    const uint IGT_DELAY = (1<<20);
+    
+    const uint MEMORYCHECK = (1<<19);
+    const uint MEMORY_RISING = (1<<18);
+    const uint MEMORY_FALLING = (0<<18);
 
-    const uint MEMORYCHECK = (1<<15);
-    const uint MEMORY_RISING = (1<<14);
-    const uint MEMORY_FALLING = (0<<14);
+    const uint BOUNDSTYPE_MASK = (7<<17);
+    const uint BOUNDSTYPE_AABB = (1<<17);
+    const uint BOUNDSTYPE_CIRC = (2<<17);
+    const uint BOUNDSTYPE_CYL = (3<<17);
+    const uint BOUNDSTYPE_SPHERE = (4<<17);
+    const uint BOUNDSTYPE_XYRBB = (5<<17)
+    const uint BOUNDS_IO_MASK = (1<<16);
+    const uint BOUNDS_INSIDE = (1<<16);
+    const uint BOUNDS_OUTSIDE = (0<<16);
 
-    const uint BOUNDSTYPE_MASK = (7<<11);
-    const uint BOUNDSTYPE_AABB = (1<<11);
-    const uint BOUNDSTYPE_CIRC = (2<<11);
-    const uint BOUNDSTYPE_CYL = (3<<11);
-    const uint BOUNDSTYPE_SPHERE = (4<<11);
-    const uint BOUNDS_IO_MASK = (1<<10);
-    const uint BOUNDS_INSIDE = (1<<10);
-    const uint BOUNDS_OUTSIDE = (0<<10);
-
-    const uint SKIP_FLAGS = (1<<9);
-    const uint SAVETGL = (1<<8);
+    const uint SKIP_FLAGS = (1<<11);
+    const uint SAVETGL = (1<<10);
+    const uint PAUSE_HIGH = (1<<9);
+    const uint PAUSE_LOW = (1<<8);
+    const uint PAUSE_MASK = (3<<8);
     const uint LOAD_FLANK_RISING = (1<<7);
     const uint LOAD_FLANK_FALLING = (1<<6);
     const uint LOAD_HIGH = (1<<5);
@@ -160,6 +179,10 @@ startup
 
     Func<dynamic, dynamic, uint> CalcFlags = (paraOld, paraCurrent) => {
         uint ret = 0;
+
+        if ((paraCurrent.paused > 0) && (paraCurrent.loading == 0)) { ret |= PAUSE_HIGH; }
+        else { ret |= PAUSE_LOW; }
+
         if (paraCurrent.loading > 0) { ret |= LOAD_HIGH; }
         else { ret |= LOAD_LOW; }
         if ((paraCurrent.loading > 0) != (paraOld.loading > 0)) {
@@ -218,6 +241,8 @@ startup
                     return vars.BoundsCheckCyl(vars.positionVec, dataVec, 1, chkForInside);
                 case BOUNDSTYPE_SPHERE:
                     return vars.BoundsCheckSphere(vars.positionVec, dataVec, 1, chkForInside);
+                case BOUNDSTYPE_XYRBB:
+                    return vars.BoundsCheckXYRBB(vars.positionVec, dataVec, 1, chkForInside);
                 default:
                     return false;
             }
@@ -276,36 +301,44 @@ startup
     AddSplitSetting("ngp_overall", "NG+ Run", "Main game splits used for NG+, also works for NG", null);
         AddSplitSetting("ngp_start", "NG+ Start", "Trigger run start on top of the cable car ride", "ngp_overall");
         AddSplitSetting("ngp_a1_barren_light", "Barren Light (FT)", "Fast travelling after completing To The Brink", "ngp_overall");
-        AddSplitSetting("ngp_a1_embassy", "Embassy", "Cutscene skip after defeating Grudda", "ngp_overall");
+        AddSplitSetting("ngp_a1_embassy", "Embassy", "Cutscene start after defeating Grudda", "ngp_overall");
         AddSplitSettingF("ngp_a1_tallneck", "Tallneck (FT)", "Fast travelling to the Tallneck after Embassy", "ngp_overall");
         AddSplitSetting("ngp_a1_igniter", "Igniter", "Exploding the Latopolis firegleam at entry", "ngp_overall");
         AddSplitSetting("ngp_a1_latopolis", "Latopolis", "Exploding the Latopolis firegleam at exit", "ngp_overall");
-        AddSplitSetting("ngp_a1_tau", "Tau", "Overriding the Tau Core after the Grimhorn fight", "ngp_overall");
+        AddSplitSetting("ngp_a1_tau", "Tau", null, "ngp_overall");
+            AddSplitSettingF("ngp_a1_tau_door", "Tau (Entry)", "Skipping the cutscene that gives Zo her Focus.", "ngp_a1_tau");
+            AddSplitSettingF("ngp_a1_tau_skips", "Tau Skips", "Skipping the cutscene opening the door to the Grimhorn", "ngp_a1_tau");
+            AddSplitSetting("ngp_a1_tau_core", "Tau (Core)", "Overriding the Tau Core after the Grimhorn fight", "ngp_a1_tau");
         AddSplitSetting("ngp_a1_base", "Base", "Skipping the cutscene exiting the Base to the west", "ngp_overall");
-        AddSplitSetting("ngp_a2_capsule", "Capsule", "Fast travelling to the Hive campfire after starting Poseidon", "ngp_overall");
+        AddSplitSetting("ngp_a2_capsule", "Capsule (FT)", "Fast travelling after starting Poseidon", "ngp_overall");
         AddSplitSettingF("ngp_a2_memorial_grove", "Memorial Grove", "Talking to Dekka when entering the Grove", "ngp_overall");
-        AddSplitSetting("ngp_a2_kotallo", "Kotallo Skip", "Skipping the custscene when entering the Bulwark", "ngp_overall");
+            AddSplitSetting("npg_a2_memorial_grove_enter", "Grove (Entering)", "Talking to Dekka when entering the Grove", "ngp_a2_memorial_grove");
+            AddSplitSettingF("npg_a2_memorial_grove_leave", "Grove (Entering)", "Talking to Dekka when leaving the Grove", "ngp_a2_memorial_grove");
+        AddSplitSetting("ngp_a2_kotallo", "Kotallo Skip", "Skipping the cutscene when entering the Bulwark", "ngp_overall");
         AddSplitSetting("ngp_a2_bulwark", "Bulwark", "Skipping the cutscene destroying the Bulwark", "ngp_overall");
         AddSplitSetting("ngp_a2_alva", "Alva", "Skipping the cutscene when meeting Alva after the Quen fight", "ngp_overall");
-        AddSplitSetting("ngp_a2_demeter_ft", "Demeter (FT)", "Fast travelling after retrieving Demeter", "ngp_overall");
-        AddSplitSettingF("ngp_a2_demeter_gaia", "Demeter Merge", "When merging GAIA with Demeter", "ngp_overall");
+        AddSplitSetting("ngp_a2_demeter", "Demeter", null, "ngp_overall");
+            AddSplitSetting("ngp_a2_demeter_ft", "Demeter (FT)", "Fast travelling after retrieving Demeter", "ngp_a2_demeter");
+            AddSplitSettingF("ngp_a2_demeter_gaia", "Demeter Merge", "When merging GAIA with Demeter", "ngp_a2_demeter");
         AddSplitSetting("ngp_a2_beta", "Beta", "Fast travelling away from the Base after retrieving Beta", "ngp_overall");
-        AddSplitSetting("ngp_a2_aether_ft", "Aether (FT)", "Fast travelling after retrieving Aether", "ngp_overall");
-        AddSplitSettingF("ngp_a2_aether_gaia", "Aether Merge", "When merging GAIA with Aether", "ngp_overall");
-        AddSplitSetting("ngp_a2_poseidon_ft", "Poseidon (FT)", "Fast travelling after retrieving Poseidon", "ngp_overall");
-        AddSplitSettingF("ngp_a2_poseidon_gaia", "Poseidon Merge", "When merging GAIA with Poseidon", "ngp_overall");
-        AddSplitSetting("ngp_a3_thunderjaw", "Thunderjaw (San Fran)", "Skipping the cutscene speaking to Alva in SF", "ngp_overall");
+        AddSplitSetting("ngp_a2_aether", "Aether", null, "ngp_overall");
+            AddSplitSetting("ngp_a2_aether_ft", "Aether (FT)", "Fast travelling after retrieving Aether", "ngp_a2_aether");
+            AddSplitSettingF("ngp_a2_aether_gaia", "Aether Merge", "When merging GAIA with Aether", "ngp_a2_aether");
+        AddSplitSetting("ngp_a2_poseidon", "Poseidon", null, "ngp_overall");
+            AddSplitSetting("ngp_a2_poseidon_ft", "Poseidon (FT)", "Fast travelling after retrieving Poseidon", "ngp_a2_poseidon");
+            AddSplitSettingF("ngp_a2_poseidon_gaia", "Poseidon Merge", "When merging GAIA with Poseidon", "ngp_a2_poseidon");
+        AddSplitSetting("ngp_a3_thunderjaw", "Thunderjaw (San Fran)", "Speaking to Alva in SF", "ngp_overall");
         AddSplitSetting("ngp_a3_thebes", "Thebes", "Fast travelling away from Thebes", "ngp_overall");
         AddSplitSetting("ngp_a3_gemini", "Gemini", "Skipping the cutscene after completing Gemini (flashbang)", "ngp_overall");
         AddSplitSetting("ngp_a3_regalla", "Regalla", "Fast travelling away from the Grove after dealing with Regalla", "ngp_overall");
         AddSplitSetting("ngp_a3_singularity","Singularity", null, "ngp_overall");
-            AddSplitSettingF("ngp_a3_sing_start", "Point of no return", "Skipping the cutscene starting the Sinularity mission", "ngp_a3_singularity");
+            AddSplitSettingF("ngp_a3_sing_start", "Point of no return", "Skipping the cutscene starting the Singularity mission (triggers after loads)", "ngp_a3_singularity");
             AddSplitSetting("ngp_a3_fz_skip", "FZ Skip", "On RFS to skip half of the final mission", "ngp_a3_singularity");
             AddSplitSettingF("ngp_a3_eric", "Eric", "On skipping the cutscene after defeating Eric", "ngp_a3_singularity");
         AddSplitSetting("ngp_a3_tilda", "Tilda", "On triggering the cutscene ending the main game runs (NOT on defeating Specter Prime)", "ngp_overall");
     AddSplitSettingF("ng_additional", "NG / Any% additional", "Prologue splits for Any% / NG runs. Also enable the NG+ splits", null);
         AddSplitSetting("ng_start", "NG / Any% Start", "Trigger run start at the beginning of the prologue", "ng_additional");
-        AddSplitSetting("ng_frost_sling", "Frost Sling", "Skipping the projector hologram before getting the Frost Sling", "ng_additional");
+        AddSplitSetting("ng_frost_sling", "Frost Sling Holo", "Skipping the projector hologram before getting the Frost Sling", "ng_additional");
         AddSplitSetting("ng_fake_gaia", "Fake GAIA", "When entering the GAIA room in the FZ datacenter", "ng_additional");
         AddSplitSetting("ng_cable_car", "Cable Car", "On the top of cable car (same as NG+ start, but as split)", "ng_additional");
 
@@ -314,10 +347,10 @@ startup
         AddSplitSettingF("bs_start_split", "NG+ Burning Shores Start (as split)", "Trigger a split on the way to the Burning Shores (e.g. for combined main game and BS runs)", "bs_mq");
         AddSplitSetting("bs_skiff1", "Skiff", "Different options for the split after the first fight", "bs_mq");
             AddSplitSettingF("bs_skiff1_fight", "Post-fight cutscene", "Skipping the cutscene after defeating the machines", "bs_skiff1");
-            AddSplitSetting("bs_skiff1_skiff", "Sitting down on the skiff", null, "bs_skiff1");
+            AddSplitSetting("bs_skiff1_skiff", "Sitting down on the skiff", "Note: This splits slightly after sitting down", "bs_skiff1");
             AddSplitSettingF("bs_skiff1_skiff_move", "Skiff starts moving", null, "bs_skiff1");
             AddSplitSettingF("bs_skiff1_fleets_end", "Arriving in Fleet's End", "Skipping the first cutscene after the skiff ride", "bs_skiff1");
-        AddSplitSettingF("bs_bilegut", "Bilegut", "Passing the vines at the Tower entrance", "bs_mq");
+        // AddSplitSettingF("bs_bilegut", "Bilegut", "Passing the vines at the Tower entrance", "bs_mq");
         AddSplitSetting("bs_tower", "Tower", "Different options for the Tower split", "bs_mq");
             AddSplitSettingF("bs_tower_seyka", "Talking to Seyka", "Start talking to Seyka after completing the tower", "bs_tower");
             AddSplitSetting("bs_tower_ft", "Fleet's End FT", "Fast travelling after the tower", "bs_tower");
@@ -352,6 +385,9 @@ startup
         AddSplitSetting("bs_trinket_music_box", "Trinket: Music Box", "Music Box is in the Scorcher cave", "bs_100");
             AddSplitSettingF("bs_trinket_music_box_save", "On Trinket collection" , "On checkpoint collecting the trinket", "bs_trinket_music_box");
             AddSplitSetting("bs_trinket_music_box_load", "RFS / FT after Trinket collection" , "Any loads after collecting the trinket", "bs_trinket_music_box");
+        AddSplitSetting("bs_aerial_nw", "Aerial NW", "Aerial NW ends at the Hollywood sign", "bs_100");
+            AddSplitSetting("bs_aerial_nw_save", "On Aerial completion" , "On checkpoint after closing the aerial", "bs_aerial_nw");
+            AddSplitSettingF("bs_aerial_nw_load", "RFS / FT after Aerial completion" , "Any loads after closing the aerial", "bs_aerial_nw");
         AddSplitSetting("bs_theta", "Cauldron Theta", null, "bs_100");
             AddSplitSettingF("bs_theta_entry", "Entry", "When going down the corridor entering the cauldron", "bs_theta");
             AddSplitSettingF("bs_theta_override", "Node Override", "Overriding the node lowering the shield", "bs_theta");
@@ -396,22 +432,1159 @@ startup
 
     vars.startingDB = new Tuple<string, double[]>[]{
         new Tuple<string, double[]>(
-            "identifier", new double[]{}
+            "ngp_start", new double[]{
+                BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_LOW,
+                5,
+                4051.11, 948.64,
+                623, 627
+            }
         ),
+        new Tuple<string, double[]>(
+            "ng_start", new double[]{
+                BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_LOW,
+                5,
+                5649.10, -2878.05
+            }
+        ),
+        new Tuple<string, double[]>(
+            "bs_start", new double[]{
+                BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_LOW,
+                5,
+                579.40, -4744.63,
+                270, 275
+            }
+        )
     };
-
+    const uint NUM_OF_STEPS = 0;
     vars.splittingDB = new Tuple<string, uint, double[][]>[]{
+        // NG+
         new Tuple<string, uint, double[][]>(
-            "identifier", 1, new double[][]{ 
+            "ngp_a1_barren_light", 3, new double[][]{ 
+                new double[]{ // Ulvund
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    3514.57, 631.94
+                },
+                new double[]{ // Vuadis
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    3478.15, 693.58
+                },
+                new double[]{ // FT away from CS
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    50,
+                    3478.15, 693.58
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a1_embassy", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    2861.84, -94.74
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a1_tallneck", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | LOAD_HIGH,
+                    1,
+                    2104.01, -263.95
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a1_igniter", 1, new double[][]{ 
+                new double[]{ // Position erroring door: 1409.98, -1056.98
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    0.5,
+                    1407.43, -1055.16,
+                    418, 423
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a1_latopolis", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    1167.75, -1016.77,
+                    380, 384
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a1_tau_door", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_FALLING,
+                    1,
+                    1316.54, -63.61,
+                    505, 509
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a1_tau_skips", 1, new double[][]{ 
+                new double[]{ // 1204.34,-135.38 -> CS -> 1204.4,-148.3
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_FALLING,
+                    8,
+                    1204.35, -141.8,
+                    510, 514
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a1_tau_core", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    1,
+                    1204.68, -182.48,
+                    498, 501
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a1_base", 1, new double[][]{ 
+                new double[]{ // 1080.9,-128.4 -> CS -> 1065.7,-134.0 ; Save (2x) is def outside though
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1065.7, -134.0,
+                    594, 597
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_capsule", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    168.20, -1755.25,
+                    358, 365
+                },
+                new double[]{ // post RFS: 193.0, -1755.7
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    60,
+                    168.20, -1755.25
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_memorial_grove_enter", 1, new double[][]{ 
+                new double[]{ // -552.1,-695.8 -> Dia skipping -> -561.3,-701.2
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    3,
+                    -552.1, -695.8
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "npg_a2_memorial_grove_leave", 2, new double[][]{ 
+                new double[]{ // Hekarro
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    5,
+                    -652.3, -726.3,
+                    423, 427
+                },
+                new double[]{ // -560.06,-702.16 -> CS -> -560.24,-701.8
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_FLANK_FALLING,
+                    2,
+                    -560.24, -701.8
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_kotallo", 2, new double[][]{ 
+                new double[]{ // -1723.13, 498.74 -> CS -> -1722.13, 391.31
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -1723.13, 498.74
+                },
+                new double[]{
+                    INVUL_FLANK_FALLING
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_bulwark", 2, new double[][]{ 
+                new double[]{ // Shooting: -1730.46,462.68, -1732.14,455.49 -> CS -> 1723.03, 479.15
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -1732.14, 455.49
+                },
+                new double[]{
+                    INVUL_FLANK_FALLING
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_alva", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -2432.61, -299.38
+                },
+                new double[]{
+                    INVUL_FLANK_FALLING
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_demeter_ft", 2, new double[][]{ 
+                new double[]{ // Demeter Core
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -2434.22, -152.16,
+                    266, 269
+                },
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    100,
+                    -2434.22, -152.16
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_demeter_gaia", 2, new double[][]{ 
+                new double[]{ // Demeter Core
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -2434.22, -152.16,
+                    266, 269
+                },
+                new double[]{ // GAIA
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    4,
+                    1126.70, -172.77,
+                    602, 607
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_beta", 3, new double[][]{ 
+                new double[]{ // Ninmah console
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    543.45, 1292.2,
+                    585, 589
+                },
+                new double[]{ // Varl in Base basement
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    3,
+                    1126.43, -161.77,
+                    585, 588
+                },
+                new double[]{ // FT from Base
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    150,
+                    1126, -160
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_aether_ft", 2, new double[][]{ 
+                new double[]{ // Aether core
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -645.64, -724.19,
+                    409, 412
+                },
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    100,
+                    -645.64, -724.19,
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_aether_gaia", 2, new double[][]{ 
+                new double[]{ // Aether core
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -645.64, -724.19,
+                    409, 412
+                },
+                new double[]{ // GAIA
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    4,
+                    1126.70, -172.77,
+                    602, 607
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_poseidon_ft", 3, new double[][]{ 
+                new double[]{ // Poseidon core
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    375.89, -1607.86,
+                    289, 293
+                },
+                new double[]{ // outside
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    4,
+                    189.87, -1755.63,
+                    377, 381
+                },
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    50,
+                    189.87, -1755.63
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_poseidon_gaia", 2, new double[][]{ 
+                new double[]{ // Poseidon core
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    375.89, -1607.86,
+                    289, 293
+                },
+                new double[]{ // GAIA
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    4,
+                    1126.70, -172.77,
+                    602, 607
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a3_thunderjaw", 1, new double[][]{ 
+                new double[]{ 
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -4124.05, -756.87
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a3_thebes", 4, new double[][]{ 
+                new double[]{ // Omega console
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -4347.25, -701.26,
+                    170, 174
+                },
+                new double[]{ // start of CS
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    5,
+                    -4202.13, -751.30
+                },
+                new double[]{ // end of CS
+                    INVUL_LOW
+                },
+                new double[]{ // FT
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    100,
+                    -4124.61, -759.17
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a3_gemini", 3, new double[][]{ 
+                new double[]{ // Slaugtherspine node override (via saves)
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    -338.63, -278.94,
+                    321, 325
+                },
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -374.48, -417.82,
+                    326, 330
+                },
+                new double[]{ // Flashbang ports the position to Tilda already
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE,
+                    150,
+                    -374.48, -417.82
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a3_regalla", 3, new double[][]{ 
+                new double[]{ // end of phase 1, because of unique position
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -737.66, -673.45,
+                    425, 427
+                },
+                new double[]{ // Sylens holo talk
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    4,
+                    -652.03, -726.97,
+                    423, 427
+                },
+                new double[]{ // FT
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    150,
+                    -652.03, -726.97
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a3_sing_start", 2, new double[][]{ 
+                new double[]{ // Singularity campfire
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -1155.37, -2664.07
+                },
+                new double[]{ // port to island
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_LOW,
+                    20,
+                    -1218.0, -3076.25
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a3_fz_skip", 2, new double[][]{ 
+                new double[]{ // Singularity campfire
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -1155.37, -2664.07
+                },
+                new double[]{ // split during load
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE,
+                    5,
+                    -1640.05, -3209.68
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a3_eric", 2, new double[][]{ 
+                new double[]{ // start of Eric kill CS
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -1749.26, -2938.77,
+                    274, 280
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a3_tilda", 3, new double[][]{ 
+                new double[]{ // CS killing Specter Prime
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -1811.02, -2885.18,
+                    378, 382
+                },
+                new double[]{
+                    INVUL_LOW
+                },
+                new double[]{ // Tilda pod
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    7,
+                    -1771.62, -2921.04,
+                    378, 385
+                }
+            }
+        ),
+        // Any% additional
+        new Tuple<string, uint, double[][]>(
+            "ng_frost_sling", 2, new double[][]{ 
+                new double[]{ // holo start
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    6188.75, -3084.71
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ng_fake_gaia", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    6749.64, -3000.88
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ng_cable_car", 2, new double[][]{ 
+                new double[]{ // last CS
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    4128.66, 1017.12
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        // BS Main
+        new Tuple<string, uint, double[][]>(
+            "bs_start_split", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    30,
+                    -2720.46, -2700.25,
+                    360, 388
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_skiff1_fight", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    3,
+                    582.10, -4785.80
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_skiff1_skiff", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    550.20, -4888.74
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_skiff1_skiff_move", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    550.20, -4888.74
+                },
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | SKIP_FLAGS,
+                    0.07,
+                    550.20, -4888.74
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_skiff1_fleets_end", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    550.20, -4888.74
+                },
+                new double[]{ // Porting of skipping the CS in Fleet's
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    865.12, -5278.45,
+                    285, 288
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_bilegut", NUM_OF_STEPS, new double[][]{ 
+                new double[]{ // Killing the Bilegut
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | SAVETGL,
+                    200,
+                    1280, -5149.47
+                },
+                new double[]{
+                    BOUNDSTYPE_XYRBB | BOUNDS_INSIDE | SKIP_FLAGS,
+                    0.1400560224, 0.1400560224, 525.4580, -0.3928371007, 0.3928371007, 2530.3609,
+                    314, 319
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_tower_seyka", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    1316.51, -5084.84,
+                    375, 378
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_tower_ft", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    1316.51, -5084.84,
+                    375, 378
+                },
+                new double[]{ // 1316.51, -5084.84 | 1409.93, -4989.53
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    80,
+                    1363, -5038
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_observatory", 2, new double[][]{ 
+                new double[]{ // Mural door
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    1700.38, -4453.37,
+                    342, 346
+                },
+                new double[]{ // Console typing is from that one place
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SKIP_FLAGS,
+                    0.02,
+                    1690.85, -4462.15, 347.19
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_transmitter_ft", 2, new double[][]{ 
+                new double[]{ // end of transmitter investigation
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1701.49, -4333.08
+                },
+                new double[]{ // CS is 1702.06, -4354.69
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    40,
+                    1700, -4344
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_control_nodes", 3, new double[][]{ 
+                new double[]{ // door scan CS
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    674.55, -4240.54
+                },
+                new double[]{ 
+                    // Horus CF: 708.34, -4295.87, 349.02
+                    // Node N: 850.94, -4247.56, 334.18
+                    // Node S: 791.94, -4334.13, 336.35
+                    // Door CF: 650.79, -4244.39, 365.00
+                    BOUNDSTYPE_AABB | BOUNDS_INSIDE | SKIP_FLAGS,
+                    700, -4350, 0,
+                    900, -4200, 1000
+                },
+                new double[]{
+                    BOUNDSTYPE_AABB | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    700, -4350, 0,
+                    900, -4200, 1000
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_acension_hall", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    375.76,-4031.15,
+                    346, 349
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_heavens_rest", 3, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    490.88, -4035.19,
+                    356, 359
+                },
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    5,
+                    684.80, -4235.73, 366.18
+                },
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    10,
+                    684.80, -4235.73
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_beach", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    1673.95, -5513.40
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_ww_override", 1, new double[][]{ 
+                new double[]{ // Quest item crafting creates save while paused
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | PAUSE_HIGH | SAVETGL,
+                    3,
+                    811.02, -5228.06
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_pangea_crossing", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    1914.54, -5906.44
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_pangea_nova", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    2415.04, -5630.00,
+                    270, 273
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_pangea_slaugtherspine_ft", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    2451.54, -5516.71
+                },
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    100,
+                    2451.54, -5516.71
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_horus_cooling", 2, new double[][]{ 
+                new double[]{ // cooling CS
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    554.78, -4215.25
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_horus_sink1", 1, new double[][]{ 
+                new double[]{ // spawn point of RFS
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | LOAD_HIGH,
+                    1,
+                    -226.37, -4541.37
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_horus_sink2", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | LOAD_HIGH,
+                    1,
+                    -284.42, -4744.33
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_horus_arms", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -296.63, -4802.59, 256.52
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_londra", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -292.41, -5321.89, 301.79
+                },
+                new double[]{ // load high because invul stays high through the load
+                    LOAD_HIGH
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_seyka", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    511.67, -4755.88
+                }
+            }
+        ),
+        // BS 100% additional
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_ne_save", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1812.04, -4415.36, 339.80
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_ne_load", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1812.04, -4415.36, 339.80
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_trinket_pot_save", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1921.03, -4051.32
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_trinket_pot_load", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1921.03, -4051.32
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_transmitter_cs", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    1702.06, -4354.69
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_n_save", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1148.68, -4628.44, 296.73
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_n_load", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1148.68, -4628.44, 296.73
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_trinket_music_box_save", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1253.06, -4306.27,
+                    270, 273
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_trinket_music_box_load", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1253.06, -4306.27,
+                    270, 273
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_nw_save", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    681.60, -4317.26, 359.26
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_nw_load", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    681.60, -4317.26, 359.26
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_theta_entry", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    20,
+                    2323.49, -5035.73, 282.95
+                },
+                new double[]{
+                    BOUNDSTYPE_XYRBB | BOUNDS_INSIDE | SKIP_FLAGS,
+                    0.0568106524, -0.0413043632, -339.7093, 0.2940277636, 0.4044102796, 1338.3697,
+                    252, 262
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_theta_override", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    20,
+                    2323.49, -5035.73, 282.95
+                },
+                new double[]{ 
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SKIP_FLAGS,
+                    0.2
+                    2582.83, -4720.77, 200.86
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_theta_completion", 3, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    2753.74, -5070.88, 120
+                },
+                new double[]{ // top spawn pos: 2460.59, -4921.22, 384.29
+                    INVUL_LOW
+                },
+                new double[]{ // to 2083.51, -5056.41
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    400,
+                    2607.17, -4996.0
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_figure_parking_lot", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
                 new double[]{}
             }
         ),
+        new Tuple<string, uint, double[][]>(
+            "bs_trinket_flask", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_trinket_bellowback", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_trinket_clamberjaws", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_mh_door", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_mh_friend_completion", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_mh_gildun", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_pangea_slaugtherspine_cs", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    2451.54, -5516.71
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_e_save", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_e_load", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_seyka_ft", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_sb_air", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_sb_kill", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_sb_aerial_door", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_w_save", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_w_load", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_trinket_hammer", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_splinter_tower", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_splinter_rokomo", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_splinter_focus_ft", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_wake_outside", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_wake_dig", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_wake_pirik_cs", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_wake_pirik_ft", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_s_save", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_aerial_s_load", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_sidequests", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_arena", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_epilogue", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        )
+        /*
+        new Tuple<string, uint, double[][]>(
+            "id", NUM_OF_STEPS, new double[][]{ 
+                new double[]{},
+                new double[]{}
+            }
+        ),
+        */
     };
 
     vars.memoryDB = new List<MemoryWatcher>();
     Action<int, int> FillMemoryDB = (offsetSceneManagerGame, offsetGameModule) => {
         // 0
-        //vars.memoryDB.Add()
+        vars.memoryDB.Add(new MemoryWatcher<byte>(new DeepPointer("HorizonForbiddenWest.exe", offsetSceneManagerGame, 0xE8, 0x1770, 0x1140, 0x16E1))); // NG+ Start
 
         vars.DebugOutput("FillMemoryDB: " + vars.memoryDB.Count.ToString() + " memory watchers entered.");
     };
