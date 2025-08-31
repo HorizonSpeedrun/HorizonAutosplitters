@@ -61,7 +61,7 @@ Get the value after "HorizonForbiddenWest+" -> this is the offset we need
 startup
 {
     Action<string> DebugOutput = (text) => {
-        if (true)
+        if (false)
         {
             print("[HFW Autosplitter Debug] " + text);
         }
@@ -350,7 +350,7 @@ startup
             AddSplitSetting("bs_skiff1_skiff", "Sitting down on the skiff", "Note: This splits slightly after sitting down", "bs_skiff1");
             AddSplitSettingF("bs_skiff1_skiff_move", "Skiff starts moving", null, "bs_skiff1");
             AddSplitSettingF("bs_skiff1_fleets_end", "Arriving in Fleet's End", "Skipping the first cutscene after the skiff ride", "bs_skiff1");
-        // AddSplitSettingF("bs_bilegut", "Bilegut", "Passing the vines at the Tower entrance", "bs_mq");
+        AddSplitSettingF("bs_bilegut", "Bilegut", "Passing the vines at the Tower entrance", "bs_mq");
         AddSplitSetting("bs_tower", "Tower", "Different options for the Tower split", "bs_mq");
             AddSplitSettingF("bs_tower_seyka", "Talking to Seyka", "Start talking to Seyka after completing the tower", "bs_tower");
             AddSplitSetting("bs_tower_ft", "Fleet's End FT", "Fast travelling after the tower", "bs_tower");
@@ -421,14 +421,14 @@ startup
         AddSplitSetting("bs_sq_wake", "SQ: In His Wake", null, "bs_100");
             AddSplitSettingF("bs_wake_outside", "Outside", "Skipping the cutscene after completing the outside part", "bs_sq_wake");
             AddSplitSettingF("bs_wake_dig", "Dig site", "Inserting the Key in the Dig", "bs_sq_wake");
-            AddSplitSettingF("bs_wake_pirik_cs", "Lan (CS)", "On opening Lan's cell", "bs_sq_wake");
-            AddSplitSetting("bs_wake_pirik_ft", "Lan (FT)", "On FT after opening Lan's cell", "bs_sq_wake");
+            AddSplitSettingF("bs_wake_lan_cs", "Lan (CS)", "On opening Lan's cell", "bs_sq_wake");
+            AddSplitSetting("bs_wake_lan_ft", "Lan (FT)", "On FT after opening Lan's cell", "bs_sq_wake");
         AddSplitSettingF("bs_aerial_s", "Aerial South", "Aerial South is the one unlocked after completing all the other ones", "bs_100");
             AddSplitSetting("bs_aerial_s_save", "On Aerial completion" , "On checkpoint after closing the aerial", "bs_aerial_s");
             AddSplitSettingF("bs_aerial_s_load", "RFS / FT after Aerial completion" , "Any loads after closing the aerial", "bs_aerial_s");
-        AddSplitSetting("bs_sidequests", "Handing in the sidequests", "FT after handing in both sidequests", "bs_100");
-        AddSplitSetting("bs_arena", "Arena", "FT away from the Arena (no check)", "bs_100");
-        AddSplitSetting("bs_epilogue", "Epilogue", "Triggering the Epilogue cutscene in the base", "bs_100");
+        AddSplitSetting("bs_leaving", "Leaving the Burning Shores", "FT leaving the Burning Shores after the main quest. Usually this is after handing in the sidequests, but at the moment this cannot be relibly detected.", "bs_100");
+        AddSplitSetting("bs_arena", "Arena", "FT away from the Arena (no check of completion)", "bs_100");
+        AddSplitSetting("bs_epilogue", "Epilogue", "Triggering the Epilogue cutscene in the base (no check of achieving 100%)", "bs_100");
 
     vars.startingDB = new Tuple<string, double[]>[]{
         new Tuple<string, double[]>(
@@ -1392,45 +1392,91 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_figure_parking_lot", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_figure_parking_lot", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1559.90, -5262.01,
+                    270, 274
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_trinket_flask", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_trinket_flask", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1768.39, -5220.57,
+                    261, 265
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_trinket_bellowback", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_trinket_bellowback", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1301.96, -5596.25,
+                    333, 336
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_trinket_clamberjaws", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_trinket_clamberjaws", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1000.14, -5804.86,
+                    259, 264
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_mh_door", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_mh_door", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    1447.81, -5524.30,
+                    327, 331
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_mh_friend_completion", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_mh_friend_completion", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    1335.81, -5563.90,
+                    305, 309
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_mh_gildun", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_mh_gildun", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    1335.81, -5563.90,
+                    305, 309
+                },
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    20,
+                    1335.81, -5563.90,
+                    300, 320
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
@@ -1446,129 +1492,267 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_aerial_e_save", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_aerial_e_save", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    2013.83, -5661.43, 344.95
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_aerial_e_load", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_aerial_e_load", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    2013.83, -5661.43, 344.95
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_seyka_ft", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_seyka_ft", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    511.67, -4755.88
+                },
+                new double[]{ // post credits: 557.66, -4760.38
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    50,
+                    535, -4760
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_sb_air", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_sb_air", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    50,
+                    -28.50, -5184.49, 587.82
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_sb_kill", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_sb_kill", 1, new double[][]{ 
+                new double[]{ // Fighting area: RFS: -2.10, -5167.65 -> Delver -100, -5185.05
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    70,
+                    -50, -5175,
+                    250, 280
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_sb_aerial_door", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_sb_aerial_door", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -25.89, -5196.26,
+                    260, 264
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_aerial_w_save", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_aerial_w_save", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    77.24, -5336.12, 289.00
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_aerial_w_load", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_aerial_w_load", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    77.24, -5336.12, 289.00
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_trinket_hammer", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_trinket_hammer", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    398.17, -5700.51,
+                    281, 285
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_splinter_tower", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_splinter_tower", 4, new double[][]{ 
+                new double[]{ // stabbed Quen save point
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | SAVETGL,
+                    30,
+                    58.80, -6083.76
+                },
+                new double[]{ // Boat marks
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | SKIP_FLAGS,
+                    5,
+                    41.15, -6105.67
+                },
+                new double[]{
+                    SAVETGL
+                },
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    80,
+                    41.15, -6105.67
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_splinter_rokomo", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_splinter_rokomo", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    482.51, -6019.49,
+                    273, 276
+                },
+                new double[]{
+                    INVUL_LOW
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_splinter_focus_ft", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_splinter_focus_ft", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    70,
+                    762, -5988,
+                    200, 253
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_wake_outside", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_wake_outside", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    354.57, -5430.50,
+                    278, 281
+                },
+                new double[]{
+                    INVUL_LOW
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_wake_dig", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_wake_dig", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    457.72, -5425.77,
+                    284, 288
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_wake_pirik_cs", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_wake_lan_cs", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    563.33, -5377.89,
+                    303, 307
+                },
+                new double[]{
+                    INVUL_LOW
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_wake_pirik_ft", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_wake_lan_ft", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    563.33, -5377.89,
+                    303, 307
+                },
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    5,
+                    563.33, -5377.89,
+                    290, 320
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_aerial_s_save", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_aerial_s_save", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1042.01, -4880.48, 399.72
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_aerial_s_load", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_aerial_s_load", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1042.01, -4880.48, 399.72
+                },
+                new double[]{
+                    LOAD_HIGH
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_sidequests", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_leaving", 2, new double[][]{ 
+                new double[]{ // Sekya
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    511.67, -4755.88
+                },
+                new double[]{ // BB around the BS; Ymax is the most important
+                    BOUNDSTYPE_AABB | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    -2000, -8000, -1000,
+                    3500, -3500, 2000
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_arena", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_arena", 3, new double[][]{ 
+                new double[]{ // Sekya
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    511.67, -4755.88
+                },
+                new double[]{ // Victory / Fail scene final BS challenge
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    0.5,
+                    -708.50, -615.36
+                },
+                new double[]{ // front of arena: -643.34, -638.87
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    120,
+                    -675, -630
+                }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_epilogue", NUM_OF_STEPS, new double[][]{ 
-                new double[]{},
-                new double[]{}
+            "bs_epilogue", 2, new double[][]{ 
+                new double[]{ // Sekya
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    511.67, -4755.88
+                },
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    1143.48, -114.49,
+                    594, 599
+                }
             }
         )
         /*
