@@ -150,7 +150,7 @@ startup
     const uint BOUNDSTYPE_CIRC = (2<<17);
     const uint BOUNDSTYPE_CYL = (3<<17);
     const uint BOUNDSTYPE_SPHERE = (4<<17);
-    const uint BOUNDSTYPE_XYRBB = (5<<17)
+    const uint BOUNDSTYPE_XYRBB = (5<<17);
     const uint BOUNDS_IO_MASK = (1<<16);
     const uint BOUNDS_INSIDE = (1<<16);
     const uint BOUNDS_OUTSIDE = (0<<16);
@@ -194,11 +194,11 @@ startup
         bool curInvuln = ((paraCurrent.invulnerable > 0) && (paraCurrent.mountDestructabilityResPtr == 0));
         bool oldInvuln = ((paraOld.invulnerable > 0) && (paraOld.mountDestructabilityResPtr == 0));
 
-        if (curInvuln > 0) { ret |= INVUL_HIGH; }
+        if (curInvuln) { ret |= INVUL_HIGH; }
         else { ret |= INVUL_LOW; }
-        if ((curInvuln > 0) != (oldInvuln > 0)) {
+        if (curInvuln != oldInvuln) {
             // one of the flanks is active
-            if (curInvuln > 0) { ret |= INVUL_FLANK_RISING; }
+            if (curInvuln) { ret |= INVUL_FLANK_RISING; }
             else { ret |= INVUL_FLANK_FALLING; }
         }
 
@@ -312,8 +312,8 @@ startup
         AddSplitSetting("ngp_a1_base", "Base", "Skipping the cutscene exiting the Base to the west", "ngp_overall");
         AddSplitSetting("ngp_a2_capsule", "Capsule (FT)", "Fast travelling after starting Poseidon", "ngp_overall");
         AddSplitSettingF("ngp_a2_memorial_grove", "Memorial Grove", "Talking to Dekka when entering the Grove", "ngp_overall");
-            AddSplitSetting("npg_a2_memorial_grove_enter", "Grove (Entering)", "Talking to Dekka when entering the Grove", "ngp_a2_memorial_grove");
-            AddSplitSettingF("npg_a2_memorial_grove_leave", "Grove (Entering)", "Talking to Dekka when leaving the Grove", "ngp_a2_memorial_grove");
+            AddSplitSetting("ngp_a2_memorial_grove_enter", "Grove (Entering)", "Talking to Dekka when entering the Grove", "ngp_a2_memorial_grove");
+            AddSplitSettingF("ngp_a2_memorial_grove_leave", "Grove (Exiting)", "Talking to Dekka when leaving the Grove", "ngp_a2_memorial_grove");
         AddSplitSetting("ngp_a2_kotallo", "Kotallo Skip", "Skipping the cutscene when entering the Bulwark", "ngp_overall");
         AddSplitSetting("ngp_a2_bulwark", "Bulwark", "Skipping the cutscene destroying the Bulwark", "ngp_overall");
         AddSplitSetting("ngp_a2_alva", "Alva", "Skipping the cutscene when meeting Alva after the Quen fight", "ngp_overall");
@@ -580,7 +580,7 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "npg_a2_memorial_grove_leave", 2, new double[][]{ 
+            "ngp_a2_memorial_grove_leave", 2, new double[][]{ 
                 new double[]{ // Hekarro
                     BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
                     5,
@@ -1369,7 +1369,7 @@ startup
                 },
                 new double[]{ 
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SKIP_FLAGS,
-                    0.2
+                    0.2,
                     2582.83, -4720.77, 200.86
                 }
             }
