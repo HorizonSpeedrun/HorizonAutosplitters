@@ -300,9 +300,10 @@ startup
     AddSplitSettingF("res_main_menu", "Reset on Main Menu", "Reset run when quitting to main menu (shouldn't trigger on game crash)", null);
     AddSplitSetting("ngp_overall", "NG+ Run", "Main game splits used for NG+, also works for NG", null);
         AddSplitSetting("ngp_start", "NG+ Start", "Trigger run start on top of the cable car ride", "ngp_overall");
-        AddSplitSetting("ngp_a1_barren_light", "Barren Light (FT)", "Fast travelling after completing To The Brink", "ngp_overall");
-        AddSplitSetting("ngp_a1_embassy", "Embassy", "Cutscene start after defeating Grudda", "ngp_overall");
-        AddSplitSettingF("ngp_a1_tallneck", "Tallneck (FT)", "Fast travelling to the Tallneck after Embassy", "ngp_overall");
+        AddSplitSetting("ngp_a1_daunt", "Daunt", null, "ngp_overall");
+            AddSplitSetting("ngp_a1_barren_light", "Barren Light (FT)", "Fast travelling after completing To The Brink", "ngp_a1_daunt");
+            AddSplitSetting("ngp_a1_embassy", "Embassy", "Cutscene start after defeating Grudda", "ngp_a1_daunt");
+            AddSplitSettingF("ngp_a1_tallneck", "Tallneck (FT)", "Fast travelling to the Tallneck after Embassy", "ngp_a1_daunt");
         AddSplitSetting("ngp_a1_igniter", "Igniter", "Exploding the Latopolis firegleam at entry", "ngp_overall");
         AddSplitSetting("ngp_a1_latopolis", "Latopolis", "Exploding the Latopolis firegleam at exit", "ngp_overall");
         AddSplitSetting("ngp_a1_tau", "Tau", null, "ngp_overall");
@@ -334,7 +335,7 @@ startup
         AddSplitSetting("ngp_a3_singularity","Singularity", null, "ngp_overall");
             AddSplitSettingF("ngp_a3_sing_start", "Point of no return", "Skipping the cutscene starting the Singularity mission (triggers after loads)", "ngp_a3_singularity");
             AddSplitSetting("ngp_a3_fz_skip", "FZ Skip", "On RFS to skip half of the final mission", "ngp_a3_singularity");
-            AddSplitSettingF("ngp_a3_eric", "Eric", "On skipping the cutscene after defeating Eric", "ngp_a3_singularity");
+            AddSplitSettingF("ngp_a3_erik", "Erik", "On skipping the cutscene after defeating Erik", "ngp_a3_singularity");
         AddSplitSetting("ngp_a3_tilda", "Tilda", "On triggering the cutscene ending the main game runs (NOT on defeating Specter Prime)", "ngp_overall");
     AddSplitSettingF("ng_additional", "NG / Any% additional", "Prologue splits for Any% / NG runs. Also enable the NG+ splits", null);
         AddSplitSetting("ng_start", "NG / Any% Start", "Trigger run start at the beginning of the prologue", "ng_additional");
@@ -498,8 +499,8 @@ startup
         new Tuple<string, uint, double[][]>(
             "ngp_a1_igniter", 1, new double[][]{ 
                 new double[]{ // Position erroring door: 1409.98, -1056.98
-                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
-                    0.5,
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
                     1407.43, -1055.16,
                     418, 423
                 }
@@ -797,7 +798,7 @@ startup
                     326, 330
                 },
                 new double[]{ // Flashbang ports the position to Tilda already
-                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE,
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | SKIP_FLAGS,
                     150,
                     -374.48, -417.82
                 }
@@ -846,14 +847,14 @@ startup
                     -1155.37, -2664.07
                 },
                 new double[]{ // split during load
-                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE,
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | LOAD_HIGH,
                     5,
                     -1640.05, -3209.68
                 }
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "ngp_a3_eric", 2, new double[][]{ 
+            "ngp_a3_erik", 2, new double[][]{ 
                 new double[]{ // start of Eric kill CS
                     BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
                     2,
