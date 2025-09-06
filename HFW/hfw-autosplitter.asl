@@ -311,21 +311,21 @@ startup
             AddSplitSettingF("ngp_a1_tau_skips", "Tau Skips", "Skipping the cutscene opening the door to the Grimhorn", "ngp_a1_tau");
             AddSplitSetting("ngp_a1_tau_core", "Tau (Core)", "Overriding the Tau Core after the Grimhorn fight", "ngp_a1_tau");
         AddSplitSetting("ngp_a1_base", "Base", "Skipping the cutscene exiting the Base to the west", "ngp_overall");
-        AddSplitSetting("ngp_a2_capsule", "Capsule (FT)", "Fast travelling after starting Poseidon", "ngp_overall");
-        AddSplitSettingF("ngp_a2_memorial_grove", "Memorial Grove", "Talking to Dekka when entering the Grove", "ngp_overall");
-            AddSplitSetting("ngp_a2_memorial_grove_enter", "Grove (Entering)", "Talking to Dekka when entering the Grove", "ngp_a2_memorial_grove");
-            AddSplitSettingF("ngp_a2_memorial_grove_leave", "Grove (Exiting)", "Talking to Dekka when leaving the Grove", "ngp_a2_memorial_grove");
-        AddSplitSetting("ngp_a2_kotallo", "Kotallo Skip", "Skipping the cutscene when entering the Bulwark", "ngp_overall");
-        AddSplitSetting("ngp_a2_bulwark", "Bulwark", "Skipping the cutscene destroying the Bulwark", "ngp_overall");
-        AddSplitSetting("ngp_a2_alva", "Alva", "Skipping the cutscene when meeting Alva after the Quen fight", "ngp_overall");
+        AddSplitSetting("ngp_a2_aether_1", "Aether Part 1", null, "ngp_overall");
+            AddSplitSetting("ngp_a2_memorial_grove_enter", "Memorial Grove (Entering)", "Talking to Dekka when entering the Grove", "ngp_a2_aether_1");
+            AddSplitSettingF("ngp_a2_memorial_grove_leave", "Memorial Grove (Exiting)", "Talking to Dekka when leaving the Grove", "ngp_a2_aether_1");
+            AddSplitSetting("ngp_a2_kotallo", "Kotallo Skip", "Skipping the cutscene when entering the Bulwark", "ngp_a2_aether_1");
+            AddSplitSetting("ngp_a2_bulwark", "Bulwark", "Skipping the cutscene destroying the Bulwark", "ngp_a2_aether_1");
         AddSplitSetting("ngp_a2_demeter", "Demeter", null, "ngp_overall");
+            AddSplitSetting("ngp_a2_alva", "Alva", "Skipping the cutscene when meeting Alva after the Quen fight", "ngp_a2_demeter");
             AddSplitSetting("ngp_a2_demeter_ft", "Demeter (FT)", "Fast travelling after retrieving Demeter", "ngp_a2_demeter");
             AddSplitSettingF("ngp_a2_demeter_gaia", "Demeter Merge", "When merging GAIA with Demeter", "ngp_a2_demeter");
         AddSplitSetting("ngp_a2_beta", "Beta", "Fast travelling away from the Base after retrieving Beta", "ngp_overall");
-        AddSplitSetting("ngp_a2_aether", "Aether", null, "ngp_overall");
-            AddSplitSetting("ngp_a2_aether_ft", "Aether (FT)", "Fast travelling after retrieving Aether", "ngp_a2_aether");
-            AddSplitSettingF("ngp_a2_aether_gaia", "Aether Merge", "When merging GAIA with Aether", "ngp_a2_aether");
+        AddSplitSetting("ngp_a2_aether_2", "Aether Part 2 (Kulrut)", null, "ngp_overall");
+            AddSplitSetting("ngp_a2_aether_ft", "Aether (FT)", "Fast travelling after retrieving Aether", "ngp_a2_aether_2");
+            AddSplitSettingF("ngp_a2_aether_gaia", "Aether Merge", "When merging GAIA with Aether", "ngp_a2_aether_2");
         AddSplitSetting("ngp_a2_poseidon", "Poseidon", null, "ngp_overall");
+            AddSplitSetting("ngp_a2_capsule", "Capsule (FT)", "Fast travelling after starting Poseidon (usually directly after Base)", "ngp_a2_poseidon");
             AddSplitSetting("ngp_a2_poseidon_ft", "Poseidon (FT)", "Fast travelling after retrieving Poseidon", "ngp_a2_poseidon");
             AddSplitSettingF("ngp_a2_poseidon_gaia", "Poseidon Merge", "When merging GAIA with Poseidon", "ngp_a2_poseidon");
         AddSplitSetting("ngp_a3_thunderjaw", "Thunderjaw (San Fran)", "Speaking to Alva in SF", "ngp_overall");
@@ -338,7 +338,7 @@ startup
             AddSplitSettingF("ngp_a3_erik", "Erik", "On skipping the cutscene after defeating Erik", "ngp_a3_singularity");
         AddSplitSetting("ngp_a3_tilda", "Tilda", "On triggering the cutscene ending the main game runs (NOT on defeating Specter Prime)", "ngp_overall");
     AddSplitSettingF("ng_additional", "NG / Any% additional", "Prologue splits for Any% / NG runs. Also enable the NG+ splits", null);
-        AddSplitSetting("ng_start", "NG / Any% Start", "Trigger run start at the beginning of the prologue", "ng_additional");
+        AddSplitSetting("ng_start", "NG / Any% Start", "Trigger run start at the beginning of the prologue\rNote that this can trigger under some circumstances when loading from title screen. Only enable if you are doing NG runs.", "ng_additional");
         AddSplitSetting("ng_frost_sling", "Frost Sling Holo", "Skipping the projector hologram before getting the Frost Sling", "ng_additional");
         AddSplitSetting("ng_fake_gaia", "Fake GAIA", "When entering the GAIA room in the FZ datacenter", "ng_additional");
         AddSplitSetting("ng_cable_car", "Cable Car", "On the top of cable car (same as NG+ start, but as split)", "ng_additional");
@@ -442,7 +442,7 @@ startup
         ),
         new Tuple<string, double[]>(
             "ng_start", new double[]{
-                BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_LOW,
+                BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_FLANK_FALLING,
                 5,
                 5649.10, -2878.05
             }
