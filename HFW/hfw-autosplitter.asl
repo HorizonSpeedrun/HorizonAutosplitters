@@ -61,7 +61,7 @@ Get the value after "HorizonForbiddenWest+" -> this is the offset we need
 startup
 {
     Action<string> DebugOutput = (text) => {
-        if (false)
+        if (true)
         {
             print("[HFW Autosplitter Debug] " + text);
         }
@@ -98,7 +98,7 @@ startup
 
     Func<double[], double[], int, bool, bool> BoundsCheckXYRBB = (pos, dataVec, index0, chkForInside) => {
         // dataVec: [ 2x3-row-major-hom-trafo z_min z_max]
-        if (pos[2] < dataVec[index0 + 6] || pos[2] > dataVec[index0 + 6])
+        if (pos[2] < dataVec[index0 + 6] || pos[2] > dataVec[index0 + 7])
         {
             return !chkForInside;
         }
@@ -139,11 +139,11 @@ startup
     };
     vars.BoundsCheckCyl = BoundsCheckCyl;
 
-    const uint IGT_DELAY = (1<<20);
+    const uint IGT_DELAY = (1<<22);
     
-    const uint MEMORYCHECK = (1<<19);
-    const uint MEMORY_RISING = (1<<18);
-    const uint MEMORY_FALLING = (0<<18);
+    const uint MEMORYCHECK = (1<<21);
+    const uint MEMORY_RISING = (1<<20);
+    const uint MEMORY_FALLING = (0<<20);
 
     const uint BOUNDSTYPE_MASK = (7<<17);
     const uint BOUNDSTYPE_AABB = (1<<17);
@@ -357,19 +357,21 @@ startup
             AddSplitSetting("bs_tower_ft", "Fleet's End FT", "Fast travelling after the tower", "bs_tower");
         AddSplitSetting("bs_observatory", "Observatory", "Triggering the console in Londra's living quarters", "bs_mq");
         AddSplitSetting("bs_transmitter_ft", "Transmitter (FT)", "Fast-travelling from the Transmitter (100% splits have another option here)", "bs_mq");
-        AddSplitSetting("bs_control_nodes", "Heaven's Rest - Control Nodes", "Fast travelling out of the control node area", "bs_mq");
+        AddSplitSetting("bs_control_nodes", "Control Nodes", "Fast travelling out of the control node area", "bs_mq");
         AddSplitSettingF("bs_acension_hall", "Heaven's Rest - Acension Hall", "Talking to Seyka after scanning the ship (or completing the dry wiggle)", "bs_mq");
-        AddSplitSetting("bs_heavens_rest", "Heaven's Rest - Zeth", "Fast travelling away after defeating Zeth", "bs_mq");
+        AddSplitSetting("bs_heavens_rest", "Heaven's Rest - Zeth (FT)", "Fast travelling away after defeating Zeth", "bs_mq");
         AddSplitSetting("bs_beach", "Beach", "Skipping the cutscene talking to Seyka at the beach", "bs_mq");
         AddSplitSetting("bs_ww_override", "Waterwing Override", "Crafting the Waterwing override", "bs_mq");
-        AddSplitSetting("bs_pangea_crossing", "Pangea's Park - Crossing", "Skipping the cutscene ", "bs_mq");
-        AddSplitSettingF("bs_pangea_nova", "Pangea's Park - Nova", "Interacting with the Nova's console", "bs_mq");
-        AddSplitSetting("bs_pangea_slaugtherspine_ft", "Pangea's Park - Slaugtherspine (FT)", "Fast travelling away from the Apex Spiny (100% splits have another option here)", "bs_mq");
-        AddSplitSetting("bs_horus_cooling", "Horus - Cooling", "Skipping the cutscene after destroying the cooling pipe", "bs_mq");
-        AddSplitSettingF("bs_horus_sink1", "Horus - Underbelly sink", "On RFS after the destroying the underbelly heat sink", "bs_mq");
-        AddSplitSetting("bs_horus_sink2", "Horus - Side sink", "On RFS after the destroying the side heat sink", "bs_mq");
-        AddSplitSetting("bs_horus_arms", "Horus - Arms", "Skipping the cutscene after destroying the main heat sink", "bs_mq");
-        AddSplitSetting("bs_londra", "Londra", "Skipping the cutscene after defeating Londra", "bs_mq");
+        AddSplitSetting("bs_pangea", "Pangea Park", null, "bs_mq");
+            AddSplitSetting("bs_pangea_crossing", "Crossing", "Skipping the cutscene ", "bs_pangea");
+            AddSplitSettingF("bs_pangea_nova", "Nova", "Interacting with the Nova's console", "bs_pangea");
+            AddSplitSetting("bs_pangea_slaugtherspine_ft", "Slaugtherspine (FT)", "Fast travelling away from the Apex Spiny (100% splits have another option here)", "bs_pangea");
+        AddSplitSetting("bs_horus", "Horus", null, "bs_mq");
+            AddSplitSetting("bs_horus_cooling", "Cooling", "Skipping the cutscene after destroying the cooling pipe", "bs_horus");
+            AddSplitSettingF("bs_horus_sink1", "Underbelly sink", "On RFS after the destroying the underbelly heat sink", "bs_horus");
+            AddSplitSetting("bs_horus_sink2", "Side sink", "On RFS after the destroying the side heat sink", "bs_horus");
+            AddSplitSetting("bs_horus_arms", "Arms", "Skipping the cutscene after destroying the main heat sink", "bs_horus");
+            AddSplitSetting("bs_londra", "Londra", "Skipping the cutscene after defeating Londra", "bs_horus");
         AddSplitSetting("bs_seyka", "Seyka", "End of the BS main quest runs", "bs_mq");
 
     AddSplitSettingF("bs_100", "100% Burning Shores additional", "Additional 100% splits for Burning Shores (does not check actual progress)", null);
@@ -984,7 +986,7 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_bilegut", NUM_OF_STEPS, new double[][]{ 
+            "bs_bilegut", 2, new double[][]{ 
                 new double[]{ // Killing the Bilegut
                     BOUNDSTYPE_CIRC | BOUNDS_INSIDE | SAVETGL,
                     200,
@@ -1042,7 +1044,8 @@ startup
                 new double[]{ // end of transmitter investigation
                     BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
                     2,
-                    1701.49, -4333.08
+                    1701.49, -4333.08,
+                    335, 340
                 },
                 new double[]{ // CS is 1702.06, -4354.69
                     BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
@@ -1232,7 +1235,7 @@ startup
             "bs_aerial_ne_save", 1, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     1812.04, -4415.36, 339.80
                 }
             }
@@ -1241,7 +1244,7 @@ startup
             "bs_aerial_ne_load", 2, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     1812.04, -4415.36, 339.80
                 },
                 new double[]{
@@ -1286,7 +1289,7 @@ startup
             "bs_aerial_n_save", 1, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     1148.68, -4628.44, 296.73
                 }
             }
@@ -1295,7 +1298,7 @@ startup
             "bs_aerial_n_load", 2, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     1148.68, -4628.44, 296.73
                 },
                 new double[]{
@@ -1330,7 +1333,7 @@ startup
             "bs_aerial_nw_save", 1, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     681.60, -4317.26, 359.26
                 }
             }
@@ -1339,7 +1342,7 @@ startup
             "bs_aerial_nw_load", 2, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     681.60, -4317.26, 359.26
                 },
                 new double[]{
@@ -1496,7 +1499,7 @@ startup
             "bs_aerial_e_save", 1, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     2013.83, -5661.43, 344.95
                 }
             }
@@ -1505,7 +1508,7 @@ startup
             "bs_aerial_e_load", 2, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     2013.83, -5661.43, 344.95
                 },
                 new double[]{
@@ -1560,7 +1563,7 @@ startup
             "bs_aerial_w_save", 1, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     77.24, -5336.12, 289.00
                 }
             }
@@ -1569,7 +1572,7 @@ startup
             "bs_aerial_w_load", 2, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     77.24, -5336.12, 289.00
                 },
                 new double[]{
@@ -1691,7 +1694,7 @@ startup
             "bs_aerial_s_save", 1, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     1042.01, -4880.48, 399.72
                 }
             }
@@ -1700,7 +1703,7 @@ startup
             "bs_aerial_s_load", 2, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SAVETGL,
-                    2,
+                    3,
                     1042.01, -4880.48, 399.72
                 },
                 new double[]{
