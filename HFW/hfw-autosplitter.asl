@@ -361,7 +361,7 @@ startup
         AddSplitSettingF("bs_acension_hall", "Heaven's Rest - Acension Hall", "Talking to Seyka after scanning the ship (or completing the dry wiggle)", "bs_mq");
         AddSplitSetting("bs_heavens_rest", "Heaven's Rest - Zeth (FT)", "Fast travelling away after defeating Zeth", "bs_mq");
         AddSplitSetting("bs_beach", "Beach", "Skipping the cutscene talking to Seyka at the beach", "bs_mq");
-        AddSplitSetting("bs_ww_override", "Waterwing Override", "Crafting the Waterwing override", "bs_mq");
+        AddSplitSetting("bs_ww_override", "Waterwing Override", "Closing the menu after crafting the Waterwing override (crafting isn't checked)", "bs_mq");
         AddSplitSetting("bs_pangea", "Pangea Park", null, "bs_mq");
             AddSplitSetting("bs_pangea_crossing", "Crossing", "Skipping the cutscene ", "bs_pangea");
             AddSplitSettingF("bs_pangea_nova", "Nova", "Interacting with the Nova's console", "bs_pangea");
@@ -1123,11 +1123,14 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_ww_override", 1, new double[][]{ 
-                new double[]{ // Quest item crafting creates save while paused
+            "bs_ww_override", 2, new double[][]{ 
+                new double[]{ // Quest item crafting creates multiple save while paused
                     BOUNDSTYPE_CIRC | BOUNDS_INSIDE | PAUSE_HIGH | SAVETGL,
                     3,
-                    811.02, -5228.06
+                    811.02, -5729.01
+                },
+                new double[]{
+                    PAUSE_LOW
                 }
             }
         ),
@@ -1274,7 +1277,13 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "bs_transmitter_cs", 2, new double[][]{ 
+            "bs_transmitter_cs", 3, new double[][]{ 
+                new double[]{ // end of transmitter investigation
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    2,
+                    1701.49, -4333.08,
+                    335, 340
+                },
                 new double[]{
                     BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
                     2,
