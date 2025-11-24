@@ -400,6 +400,7 @@ startup
             AddSplitSettingF("bs_trinket_flask", "Trinket: Cherished Flask (load)", "RFS / FT after picking up Cherished Flask", "bs_beach_collectibles");
         AddSplitSettingF("bs_trinket_bellowback", "Trinket by Bellowback (load)", "RFS / FT after picking up Delver's Cap", "bs_100");
         AddSplitSetting("bs_trinket_clamberjaws", "Trinket by Clamberjaws (load)", "RFS / FT after picking up Lucky Porter", "bs_100");
+        AddSplitSettingF("bs_ww_parts", "Waterwing Parts (load)", "FT after getting Waterwing parts", "bs_100");
         AddSplitSetting("bs_mh", "Murmuring Hollow", null, "bs_100");
             AddSplitSettingF("bs_mh_door", "Gildun Door", "Interacting with the door (Gildun)", "bs_mh");
             AddSplitSettingF("bs_mh_friend_completion", "Friend% completion", "Final split of the Friend% CE", "bs_mh");
@@ -1119,6 +1120,19 @@ startup
                 },
                 new double[]{
                     INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "bs_ww_parts", 2, new double[][]{ 
+                new double[]{ // 1: 867.56, -5560.20, 223.53 | 2: 817.84, -5554.33, 222.78
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | SAVETGL,
+                    40,
+                    842.0, -5558.0,
+                    215, 230
+                },
+                new double[]{
+                    LOAD_HIGH
                 }
             }
         ),
