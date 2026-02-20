@@ -1807,6 +1807,32 @@ startup
 
     vars.splittingData = new List<Tuple<int,int,double>>();
     vars.splittingData.Capacity = vars.splittingDB.Length;
+    vars.splittingData.Clear();
+    vars.splittingDataArmed = false;
+    vars.splittingDataArmingIdx = -1;
+    Func<dynamic, int> splittingDataArmingFunc = (settingsAS) => {
+        if (!vars.splittingDataArmed)
+        {
+            if (vars.splittingDataArmingIdx == -1)
+            {
+                vars.DebugOutput("Arming Splitting Data");
+            }
+            vars.splittingDataArmingIdx++;
+            if (vars.splittingDataArmingIdx < vars.splittingDB.Length && settingsAS[vars.splittingDB[vars.splittingDataArmingIdx].Item1])
+            {
+                vars.splittingData.Add(
+                    new Tuple<int,int,double>(vars.splittingDataArmingIdx, 0, 0)
+                );
+            }
+            if (vars.splittingDataArmingIdx >= (vars.splittingDB.Length - 1))
+            {
+                vars.splittingDataArmed = true;
+                vars.DebugOutput("Armed Splitting Data: " + vars.splittingData.Count.ToString() + " splits active");
+            }
+        }
+        return 0;
+    };
+    vars.splittingDataArmingFunc = splittingDataArmingFunc;
 }
 
 init
@@ -1863,6 +1889,10 @@ update{
     }
     vars.currentFlags = vars.CalcFlags(old, current);
     // vars.inGameTime = current.xxx;
+    if (game != null && timer.CurrentPhase == TimerPhase.Running && !vars.splittingDataArmed)
+    {
+        vars.splittingDataArmingFunc(settings);
+    }
 }
 
 reset
@@ -1891,6 +1921,7 @@ start{
 }
 
 split{
+    if (!vars.splittingDataArmed) { return false; }
     bool retVal = false;
     int j;
     int idxDB;
@@ -1917,22 +1948,10 @@ split{
     return retVal;
 }
 
-onStart{
-    if (game == null) { return; }
-    vars.DebugOutput("Arming Splitting Data");
-    vars.splittingData.Clear();
-    for ( int i = 0 ; i < vars.splittingDB.Length ; ++i )
-    {
-        if (!settings[vars.splittingDB[i].Item1]) { continue; }
-        vars.splittingData.Add(
-            new Tuple<int,int,double>(i, 0, 0)
-        );
-    }
-    vars.DebugOutput("Armed Splitting Data: " + vars.splittingData.Count.ToString() + " splits active");
-}
-
 onReset{
     vars.splittingData.Clear();
+    vars.splittingDataArmed = false;
+    vars.splittingDataArmingIdx = -1;
     vars.resetVarsVals();
 }
 
