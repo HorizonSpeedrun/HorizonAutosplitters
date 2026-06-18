@@ -301,36 +301,41 @@ startup
     AddSplitSetting("ngp_overall", "NG+ Run", "Main game splits used for NG+, also works for NG", null);
         AddSplitSetting("ngp_start", "NG+ Start", "Trigger run start on top of the cable car ride", "ngp_overall");
         AddSplitSetting("ngp_a1_daunt", "Daunt", null, "ngp_overall");
+            AddSplitSettingF("ngp_a1_daunt_erend", "Erend", "Starting the dialogue with Erend", "ngp_a1_daunt");
             AddSplitSetting("ngp_a1_barren_light", "Barren Light (FT)", "Fast travelling after completing To The Brink", "ngp_a1_daunt");
+            AddSplitSettingF("ngp_a1_nozar", "Barren Light - Nozar", "Reaching Nozar in Barren Light (start of the dialogue)", "ngp_a1_daunt");
             AddSplitSetting("ngp_a1_embassy", "Embassy", "Cutscene start after defeating Grudda", "ngp_a1_daunt");
             AddSplitSettingF("ngp_a1_tallneck", "Tallneck (FT)", "Fast travelling to the Tallneck after Embassy", "ngp_a1_daunt");
+        AddSplitSettingF("ngp_a1_hades_holo", "Hades hologram", "Recording of Sylens and Hades underneath the Horus appearing", "ngp_overall");
         AddSplitSetting("ngp_a1_igniter", "Igniter", "Exploding the Latopolis firegleam at entry", "ngp_overall");
         AddSplitSetting("ngp_a1_latopolis", "Latopolis", "Exploding the Latopolis firegleam at exit", "ngp_overall");
         AddSplitSetting("ngp_a1_tau", "Tau", null, "ngp_overall");
             AddSplitSettingF("ngp_a1_tau_door", "Tau (Entry)", "Skipping the cutscene that gives Zo her Focus.", "ngp_a1_tau");
             AddSplitSettingF("ngp_a1_tau_skips", "Tau Skips", "Skipping the cutscene opening the door to the Grimhorn", "ngp_a1_tau");
+            AddSplitSettingF("ngp_a1_tau_grimhorn_cs", "After Grimhorn Fight (CS)", "Skipping the cutscene after the Grimhorn fight", "ngp_a1_tau");
             AddSplitSetting("ngp_a1_tau_core", "Tau (Core)", "Overriding the Tau Core after the Grimhorn fight", "ngp_a1_tau");
         AddSplitSetting("ngp_a1_base", "Base", "Skipping the cutscene exiting the Base to the west", "ngp_overall");
-        AddSplitSetting("ngp_a2_aether_1", "Aether Part 1", null, "ngp_overall");
-            AddSplitSetting("ngp_a2_memorial_grove_enter", "Memorial Grove (Entering)", "Talking to Dekka when entering the Grove", "ngp_a2_aether_1");
-            AddSplitSettingF("ngp_a2_memorial_grove_leave", "Memorial Grove (Exiting)", "Talking to Dekka when leaving the Grove", "ngp_a2_aether_1");
-            AddSplitSetting("ngp_a2_kotallo", "Kotallo Skip", "Skipping the cutscene when entering the Bulwark", "ngp_a2_aether_1");
-            AddSplitSetting("ngp_a2_bulwark", "Bulwark", "Skipping the cutscene destroying the Bulwark", "ngp_a2_aether_1");
-        AddSplitSetting("ngp_a2_demeter", "Demeter", null, "ngp_overall");
-            AddSplitSetting("ngp_a2_alva", "Alva", "Skipping the cutscene when meeting Alva after the Quen fight", "ngp_a2_demeter");
-            AddSplitSetting("ngp_a2_demeter_ft", "Demeter (FT)", "Fast travelling after retrieving Demeter", "ngp_a2_demeter");
-            AddSplitSettingF("ngp_a2_demeter_gaia", "Demeter Merge", "When merging GAIA with Demeter", "ngp_a2_demeter");
-        AddSplitSetting("ngp_a2_beta", "Beta", "Fast travelling away from the Base after retrieving Beta", "ngp_overall");
-        AddSplitSetting("ngp_a2_aether_2", "Aether Part 2 (Kulrut)", null, "ngp_overall");
-            AddSplitSetting("ngp_a2_aether_ft", "Aether (FT)", "Fast travelling after retrieving Aether", "ngp_a2_aether_2");
-            AddSplitSettingF("ngp_a2_aether_gaia", "Aether Merge", "When merging GAIA with Aether", "ngp_a2_aether_2");
+        AddSplitSetting("ngp_a2_beta", "Beta", "Fast travelling away from the Base after retrieving Beta (after first subfunction)", "ngp_overall");
+        AddSplitSetting("ngp_a2_aether", "Aether", null, "ngp_overall");
+            AddSplitSetting("ngp_a2_memorial_grove_enter", "Memorial Grove (Entering)", "Talking to Dekka when entering the Grove", "ngp_a2_aether");
+            AddSplitSettingF("ngp_a2_memorial_grove_leave", "Memorial Grove (Exiting)", "Talking to Dekka when leaving the Grove", "ngp_a2_aether");
+            AddSplitSetting("ngp_a2_kotallo", "Kotallo Skip", "Skipping the cutscene when entering the Bulwark", "ngp_a2_aether");
+            AddSplitSetting("ngp_a2_bulwark", "Bulwark", "Skipping the cutscene destroying the Bulwark", "ngp_a2_aether");
+            AddSplitSettingF("ngp_a2_kulrut_pew_pew", "Kulrut Pew-Pew section", "Skipping the cutscene after the pew-pew section into the snek fight", "ngp_a2_aether");
+            AddSplitSetting("ngp_a2_aether_ft", "Aether (FT after Kulrut)", "Fast travelling after retrieving Aether after the Kulrut", "ngp_a2_aether");
+            AddSplitSettingF("ngp_a2_aether_gaia", "Aether Merge", "When merging GAIA with Aether", "ngp_a2_aether");
         AddSplitSetting("ngp_a2_poseidon", "Poseidon", null, "ngp_overall");
             AddSplitSetting("ngp_a2_capsule", "Capsule (FT)", "Fast travelling after starting Poseidon (usually directly after Base)", "ngp_a2_poseidon");
             AddSplitSetting("ngp_a2_poseidon_ft", "Poseidon (FT)", "Fast travelling after retrieving Poseidon", "ngp_a2_poseidon");
             AddSplitSettingF("ngp_a2_poseidon_gaia", "Poseidon Merge", "When merging GAIA with Poseidon", "ngp_a2_poseidon");
+        AddSplitSetting("ngp_a2_demeter", "Demeter", null, "ngp_overall");
+            AddSplitSetting("ngp_a2_alva", "Alva", "Skipping the cutscene when meeting Alva after the Quen fight", "ngp_a2_demeter");
+            AddSplitSetting("ngp_a2_demeter_ft", "Demeter (FT)", "Fast travelling after retrieving Demeter", "ngp_a2_demeter");
+            AddSplitSettingF("ngp_a2_demeter_gaia", "Demeter Merge", "When merging GAIA with Demeter", "ngp_a2_demeter");
         AddSplitSetting("ngp_a3_thunderjaw", "Thunderjaw (San Fran)", "Speaking to Alva in SF", "ngp_overall");
         AddSplitSetting("ngp_a3_thebes", "Thebes", "Fast travelling away from Thebes", "ngp_overall");
         AddSplitSetting("ngp_a3_gemini", "Gemini", "Skipping the cutscene after completing Gemini (flashbang)", "ngp_overall");
+        AddSplitSettingF("ngp_a3_mansion", "Tilda's Mansion (FT)", "Fast-travelling from Tilda's mansion after completing Gemini", "ngp_overall");
         AddSplitSetting("ngp_a3_regalla", "Regalla", "Fast travelling away from the Grove after dealing with Regalla", "ngp_overall");
         AddSplitSetting("ngp_a3_singularity","Singularity", null, "ngp_overall");
             AddSplitSettingF("ngp_a3_sing_start", "Point of no return", "Skipping the cutscene starting the Singularity mission (triggers after loads)", "ngp_a3_singularity");
@@ -463,6 +468,15 @@ startup
     vars.splittingDB = new Tuple<string, uint, double[][]>[]{
         // NG+
         new Tuple<string, uint, double[][]>(
+            "ngp_a1_daunt_erend", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    3476.30, 132.10
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
             "ngp_a1_barren_light", 3, new double[][]{ 
                 new double[]{ // Ulvund
                     BOUNDSTYPE_CIRC | BOUNDS_INSIDE | SAVETGL,
@@ -482,6 +496,16 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
+            "ngp_a1_nozar", 1, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    1,
+                    2991.10, -52.89,
+                    478, 479.5
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
             "ngp_a1_embassy", 1, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
@@ -496,6 +520,18 @@ startup
                     BOUNDSTYPE_CIRC | BOUNDS_INSIDE | LOAD_HIGH,
                     1,
                     2104.01, -263.95
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a1_hades_holo", 2, new double[][]{ 
+                new double[]{ // Position of Aloy on the projector
+                    BOUNDSTYPE_SPHERE | BOUNDS_INSIDE | SKIP_FLAGS,
+                    2,
+                    1882.06, -886.34, 398.26
+                },
+                new double[]{ // Hologram showing up
+                    INVUL_HIGH
                 }
             }
         ),
@@ -540,6 +576,19 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
+            "ngp_a1_tau_grimhorn_cs", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    1,
+                    1197.36, -176.96,
+                    498, 501
+                },
+                new double[]{
+                    INVUL_LOW
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
             "ngp_a1_tau_core", 1, new double[][]{ 
                 new double[]{
                     BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
@@ -560,17 +609,23 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "ngp_a2_capsule", 2, new double[][]{ 
-                new double[]{
+            "ngp_a2_beta", 3, new double[][]{ 
+                new double[]{ // Ninmah console
                     BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
                     2,
-                    168.20, -1755.25,
-                    358, 365
+                    543.45, 1292.2,
+                    585, 589
                 },
-                new double[]{ // post RFS: 193.0, -1755.7
+                new double[]{ // Varl in Base basement
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    3,
+                    1126.43, -161.77,
+                    585, 588
+                },
+                new double[]{ // FT from Base
                     BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
-                    60,
-                    168.20, -1755.25
+                    150,
+                    1126, -160
                 }
             }
         ),
@@ -623,66 +678,14 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
-            "ngp_a2_alva", 2, new double[][]{ 
-                new double[]{
-                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+            "ngp_a2_kulrut_pew_pew", 2, new double[][]{ 
+                new double[]{ // CS start
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_HIGH,
                     2,
-                    -2432.61, -299.38
-                },
-                new double[]{
-                    INVUL_FLANK_FALLING
-                }
-            }
-        ),
-        new Tuple<string, uint, double[][]>(
-            "ngp_a2_demeter_ft", 2, new double[][]{ 
-                new double[]{ // Demeter Core
-                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
-                    2,
-                    -2434.22, -152.16,
-                    266, 269
+                    -698.94, -501.71
                 },
                 new double[]{
-                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
-                    100,
-                    -2434.22, -152.16
-                }
-            }
-        ),
-        new Tuple<string, uint, double[][]>(
-            "ngp_a2_demeter_gaia", 2, new double[][]{ 
-                new double[]{ // Demeter Core
-                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
-                    2,
-                    -2434.22, -152.16,
-                    266, 269
-                },
-                new double[]{ // GAIA
-                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
-                    4,
-                    1126.70, -172.77,
-                    602, 607
-                }
-            }
-        ),
-        new Tuple<string, uint, double[][]>(
-            "ngp_a2_beta", 3, new double[][]{ 
-                new double[]{ // Ninmah console
-                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
-                    2,
-                    543.45, 1292.2,
-                    585, 589
-                },
-                new double[]{ // Varl in Base basement
-                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
-                    3,
-                    1126.43, -161.77,
-                    585, 588
-                },
-                new double[]{ // FT from Base
-                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
-                    150,
-                    1126, -160
+                    INVUL_LOW
                 }
             }
         ),
@@ -718,6 +721,21 @@ startup
             }
         ),
         new Tuple<string, uint, double[][]>(
+            "ngp_a2_capsule", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    168.20, -1755.25,
+                    358, 365
+                },
+                new double[]{ // post RFS: 193.0, -1755.7
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    60,
+                    168.20, -1755.25
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
             "ngp_a2_poseidon_ft", 3, new double[][]{ 
                 new double[]{ // Poseidon core
                     BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
@@ -745,6 +763,49 @@ startup
                     2,
                     375.89, -1607.86,
                     289, 293
+                },
+                new double[]{ // GAIA
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    4,
+                    1126.70, -172.77,
+                    602, 607
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_alva", 2, new double[][]{ 
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -2432.61, -299.38
+                },
+                new double[]{
+                    INVUL_FLANK_FALLING
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_demeter_ft", 2, new double[][]{ 
+                new double[]{ // Demeter Core
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -2434.22, -152.16,
+                    266, 269
+                },
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    100,
+                    -2434.22, -152.16
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a2_demeter_gaia", 2, new double[][]{ 
+                new double[]{ // Demeter Core
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
+                    2,
+                    -2434.22, -152.16,
+                    266, 269
                 },
                 new double[]{ // GAIA
                     BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_FLANK_RISING,
@@ -804,6 +865,27 @@ startup
                     BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | SKIP_FLAGS,
                     150,
                     -374.48, -417.82
+                }
+            }
+        ),
+        new Tuple<string, uint, double[][]>(
+            "ngp_a3_mansion", 3, new double[][]{ 
+                new double[]{ // Gemini End CS
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -374.48, -417.82,
+                    326, 330
+                },
+                new double[]{ // Breakfast table
+                    BOUNDSTYPE_CYL | BOUNDS_INSIDE | INVUL_HIGH,
+                    2,
+                    -2548.06, -2552.03,
+                    298, 301
+                },
+                new double[]{
+                    BOUNDSTYPE_CIRC | BOUNDS_OUTSIDE | LOAD_HIGH,
+                    70,
+                    -2560, -2545
                 }
             }
         ),
